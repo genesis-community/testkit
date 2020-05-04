@@ -1,4 +1,4 @@
-module github.com/genesis-community/salvation
+module github.com/genesis-community/testkit
 
 go 1.14
 

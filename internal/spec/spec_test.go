@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	. "github.com/genesis-community/salvation/testing"
+	. "github.com/genesis-community/testkit/testing"
 	. "github.com/onsi/ginkgo"
 )
 
