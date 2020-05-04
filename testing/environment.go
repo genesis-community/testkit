@@ -12,7 +12,7 @@ type Environment struct {
 }
 
 func (e Environment) manifest() string {
-	return e.filePathForDir("deployments")
+	return e.filePathForDir("deployments", e.Name)
 }
 
 func (e Environment) cloudConfigManifest() string {
@@ -24,15 +24,19 @@ func (e Environment) cloudConfigManifest() string {
 	}
 }
 
-func (e Environment) vaultStub() string {
-	return e.filePathForDir("vault_stubs")
+func (e Environment) vaultProvided() string {
+	return e.filePathForDir("vault", e.Name+"-provided")
+}
+
+func (e Environment) vaultCache() string {
+	return e.filePathForDir("vault", e.Name+"-cache")
 }
 
 func (e Environment) result() string {
-	return e.filePathForDir("results")
+	return e.filePathForDir("results", e.Name)
 }
 
-func (e Environment) filePathForDir(dir string) string {
+func (e Environment) filePathForDir(dir string, name string) string {
 	return filepath.Join(KitDir, "spec", dir,
-		fmt.Sprintf("%s.yml", e.Name))
+		fmt.Sprintf("%s.yml", name))
 }

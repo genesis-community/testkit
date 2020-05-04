@@ -78,7 +78,6 @@ func (g *genesis) Manifest() []byte {
 }
 
 func (g *genesis) AddSecrets() {
-	g.logger.Println(fmt.Sprintf("adding secrets for: %s", g.environment.Name))
 	args := []string{
 		"add-secrets",
 		"--cwd", g.deploymentsDir(),

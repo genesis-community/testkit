@@ -50,12 +50,18 @@ func (v *vault) Start() {
 
 func (v *vault) Import(s string) {
 	v.logger.Println("Importing vault stub")
-	stub, err := os.Open(s)
-	defer stub.Close()
+	stub, err := ioutil.ReadFile(s)
+	Expect(err).ToNot(HaveOccurred())
+
+	tmp := map[string]map[string]string{}
+	err = yaml.Unmarshal(stub, &tmp)
+	Expect(err).ToNot(HaveOccurred())
+
+	stubJson, err := json.Marshal(tmp)
 	Expect(err).ToNot(HaveOccurred())
 
 	cmd := v.safe("import")
-	cmd.Stdin = stub
+	cmd.Stdin = bytes.NewBuffer(stubJson)
 	cmd.Run()
 	if cmd.ProcessState.ExitCode() != 0 {
 		Expect(fmt.Sprintf("failed to import: %s into vault", stub)).To(BeNil())
@@ -130,7 +136,7 @@ func stubValues(in []byte) []byte {
 		if err, ok := v.(error); ok {
 			Expect(err).ToNot(HaveOccurred())
 		}
-		out, err := json.MarshalIndent(v, "", "  ")
+		out, err := yaml.Marshal(v)
 		Expect(err).ToNot(HaveOccurred())
 		_, err = buf.Write(out)
 		Expect(err).ToNot(HaveOccurred())

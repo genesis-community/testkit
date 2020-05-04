@@ -32,9 +32,9 @@ func Test(e Environment) {
 
 			g = newGenesis(e, workDir, logger)
 
-			createVaultStubIffMissing(e.vaultStub(), v, g, logger)
+			createVaultCacheIffMissing(e.vaultCache(), e.vaultProvided(), v, g, logger)
 
-			v.Import(e.vaultStub())
+			v.Import(e.vaultCache())
 		})
 
 		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
@@ -70,11 +70,15 @@ func createResultIfMissingForManifest(result string, manifest []byte, logger *lo
 	}
 }
 
-func createVaultStubIffMissing(vaultStub string, v *vault, g *genesis, logger *log.Logger) {
-	if _, err := os.Stat(vaultStub); os.IsNotExist(err) {
-		logger.Printf("adding secrets to stub: %s", vaultStub)
+func createVaultCacheIffMissing(vaultCache string, vaultProvided string, v *vault, g *genesis, logger *log.Logger) {
+	if _, err := os.Stat(vaultProvided); err == nil {
+		logger.Printf("detected: %s loading before adding secrets", vaultProvided)
+		v.Import(vaultProvided)
+	}
+	if _, err := os.Stat(vaultCache); os.IsNotExist(err) {
+		logger.Printf("adding secrets to stub: %s", vaultCache)
 		g.AddSecrets()
-		createParentDirsAndWriteFile(vaultStub, v.Export())
+		createParentDirsAndWriteFile(vaultCache, v.Export())
 	}
 }
 

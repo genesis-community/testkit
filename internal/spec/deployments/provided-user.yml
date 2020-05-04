@@ -1,0 +1,9 @@
+kit:
+  name: dev
+  features:
+  - provided-user
+
+genesis:
+  env: provided-user
+
+params: {}

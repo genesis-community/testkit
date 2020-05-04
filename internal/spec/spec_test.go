@@ -22,4 +22,8 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "openvpn",
 		CloudConfig: "aws",
 	})
+	Test(Environment{
+		Name:        "provided-user",
+		CloudConfig: "aws",
+	})
 })

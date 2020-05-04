@@ -31,3 +31,13 @@ certificates:
 credentials:
   openvpn:
     openvpn/dh_params: dhparams 2048
+
+provided:
+  provided-user:
+    provided-user:
+      keys:
+        user:
+          sensitive: false
+          prompt:    Username for jumpbox user
+        password:
+          prompt:    Password for jumpbox user

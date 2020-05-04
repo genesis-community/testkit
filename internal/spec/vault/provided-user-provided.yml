@@ -1,0 +1,3 @@
+secret/ci/baseline/jumpbox/provided-user:
+  user: value will be replace
+  password: this value will also be replaced

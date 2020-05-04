@@ -1,0 +1,5 @@
+secret/ci/baseline/jumpbox/provided-user:
+  password: STUB secret/ci/baseline/jumpbox/provided-user:password
+  user: STUB secret/ci/baseline/jumpbox/provided-user:user
+secret/handshake:
+  knock: STUB secret/handshake:knock

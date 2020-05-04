@@ -1,0 +1,5 @@
+params:
+  users:
+    - name: (( vault "secret/ci/baseline/jumpbox/provided-user:user" ))
+      shell: /bin/bash
+      password: (( vault "secret/ci/baseline/jumpbox/provided-user:password" ))
