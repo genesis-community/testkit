@@ -1,3 +1,3 @@
 package testing
 
-var SpecRoot string
+var KitDir string

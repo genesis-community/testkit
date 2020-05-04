@@ -2,10 +2,13 @@ package testing
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"gopkg.in/yaml.v2"
 
 	. "github.com/onsi/gomega"
 )
@@ -32,13 +35,14 @@ func (v *vault) Start() {
 	err := v.server.Start()
 	Expect(err).ToNot(HaveOccurred())
 
-	Eventually(func() string {
-		if _, err := os.Stat(filepath.Join(v.homeDir, ".saferc")); os.IsNotExist(err) {
-			return ".saferc has not been created yet; vault is not yet running"
-		} else {
-			return ".saferc created"
-		}
-	}).Should(Equal(".saferc created"))
+	Eventually(func() int {
+		v.logger.Println("Waiting for vault to be ready..")
+		s := v.safe("get", "secret/handshake")
+		s.Stdout = ioutil.Discard
+		s.Stderr = ioutil.Discard
+		s.Run()
+		return s.ProcessState.ExitCode()
+	}, "2s", "100ms").Should(Equal(0))
 
 	v.logger.Println("Importing vault stub")
 	stub, err := os.Open(v.stub)
@@ -61,4 +65,15 @@ func (v *vault) safe(arg ...string) *exec.Cmd {
 	cmd.Stderr = v.logger.Writer()
 	cmd.Env = append(os.Environ(), fmt.Sprintf("HOME=%s", v.homeDir))
 	return cmd
+}
+
+func GetCurrentVaultTarget(homeDir string) string {
+	config := struct {
+		Current string `yaml:"current"`
+	}{}
+	raw, err := ioutil.ReadFile(filepath.Join(homeDir, ".saferc"))
+	Expect(err).ToNot(HaveOccurred())
+	err = yaml.Unmarshal(raw, &config)
+	Expect(err).ToNot(HaveOccurred())
+	return config.Current
 }

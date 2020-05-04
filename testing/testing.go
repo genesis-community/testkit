@@ -5,37 +5,52 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
-func Test(d Deployment) {
-	context(d.Focus, fmt.Sprintf("given a deployment manifest: %s", d.manifest()), func() {
+func Test(e Environment) {
+	context(e.Focus, fmt.Sprintf("given a environment manifest: %s", e.manifest()), func() {
 		var (
 			v       *vault
-			homeDir string
+			g       *genesis
+			workDir string
 			logger  *log.Logger
 		)
 
 		BeforeEach(func() {
 			var err error
-			homeDir, err = ioutil.TempDir(os.TempDir(), "*-salvation-home")
+			workDir, err = ioutil.TempDir(os.TempDir(), "*-salvation-home")
 			Expect(err).ToNot(HaveOccurred())
 
-			logger = log.New(GinkgoWriter, fmt.Sprintf("deployment: %s", d.Name), 0)
+			logger = log.New(GinkgoWriter, fmt.Sprintf("deployment(%s) ", e.Name), 0)
 
-			v = newVault(d.vaultStub(), homeDir, logger)
+			v = newVault(e.vaultStub(), workDir, logger)
 			v.Start()
+
+			g = newGenesis(e, workDir, logger)
 		})
 
-		It(fmt.Sprintf("renders a manifest which matches: %", d.result()), func() {
+		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
+			manifest := g.Manifest()
+			if _, err := os.Stat(e.result()); os.IsNotExist(err) {
+				logger.Printf("creating new result file: %s", e.result())
+				err = os.MkdirAll(filepath.Dir(e.result()), 0755)
+				Expect(err).ToNot(HaveOccurred())
+				err = ioutil.WriteFile(e.result(), manifest, 0644)
+				Expect(err).ToNot(HaveOccurred())
+			}
+			result, err := ioutil.ReadFile(e.result())
+			Expect(err).ToNot(HaveOccurred())
 
+			Expect(manifest).To(MatchYAML(result))
 		})
 
 		AfterEach(func() {
 			v.Stop()
-			err := os.Remove(homeDir)
+			err := os.RemoveAll(workDir)
 			Expect(err).ToNot(HaveOccurred())
 		})
 	})

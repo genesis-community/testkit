@@ -1,0 +1,51 @@
+#!/bin/bash
+set -u
+
+#Version check
+min_version="2.7.0"
+genesis_version="$(genesis -v 2>&1 | grep '^Genesis v' | sed -e 's/Genesis v\(.*\) (.*$/\1/')"
+if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_version" ; then
+  describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
+  exit 1
+fi
+set -e
+
+declare -a merge
+
+validate_features openvpn bastion \
+                  proxy azure shield # defunct
+
+merge=( manifests/jumpbox.yml )
+
+for want in $GENESIS_REQUESTED_FEATURES; do
+  case $want in
+  openvpn)
+    merge+=( "manifests/addons/$want.yml" )
+    ;;
+
+  bastion)
+    merge+=( manifests/bastion.yml )
+    ;;
+
+  shield)
+    echo >&2 "The Jumpbox Genesis Kit no longer supplies a 'shield' feature flag."
+    echo >&2 "If you wish to back up this jumpbox, please switch to using BOSH"
+    echo >&2 "runtime configurations to add the shield-agent to the deployment."
+    exit 1
+    ;;
+
+  azure)
+    echo >&2 "The Jumpbox Genesis Kit no longer supplies a 'azure' feature flag."
+    echo >&2 "This is because the 'azure' feature only impacted availability zones"
+    echo >&2 "and sets, which have no impact on a single-instance deployment."
+    ;;
+
+
+  proxy)
+    echo >&2 "You no longer need to explicitly specify the 'proxy' feature."
+    echo >&2 "If you remove it, everything will still work as expected."
+    ;;
+  esac
+done
+
+echo "${merge[@]}"
