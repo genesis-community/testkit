@@ -130,7 +130,7 @@ func stubValues(in []byte) []byte {
 		if err, ok := v.(error); ok {
 			Expect(err).ToNot(HaveOccurred())
 		}
-		out, err := json.Marshal(v)
+		out, err := json.MarshalIndent(v, "", "  ")
 		Expect(err).ToNot(HaveOccurred())
 		_, err = buf.Write(out)
 		Expect(err).ToNot(HaveOccurred())
