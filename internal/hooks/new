@@ -22,7 +22,7 @@ cidr2mask() {
       mask+=$((256 - 2**(8-partial_octet)))
     else
       mask+=0
-    fi  
+    fi
     test $i -lt 3 && mask+=.
   done
 
@@ -79,12 +79,12 @@ if [[ $openvpn == 'true' ]]; then
     echo "    - -s $route -d 172.31.255.0/24 -m conntrack --ctstate NEW -j ACCEPT -m comment --comment 'lan -> vpn'"
   done
   echo "    - -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT"
-  
+
   echo "  vpn_dns_servers:"
   for dns in "${vpn_dns_servers[@]}"; do
     echo "    - $dns"
   done
-  
+
   echo "  vpn_dns_search_domains:"
   for domain in "${vpn_dns_search_domains[@]}"; do
     echo "    - $domain"

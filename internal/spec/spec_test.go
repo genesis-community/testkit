@@ -14,5 +14,12 @@ var _ = Describe("Interal Kit", func() {
 		KitDir, _ = filepath.Abs(filepath.Join(filepath.Dir(filename), "../"))
 	})
 
-	Test(Environment{Name: "baseline", CloudConfigName: "aws"})
+	Test(Environment{
+		Name:        "baseline",
+		CloudConfig: "aws",
+	})
+	Test(Environment{
+		Name:        "openvpn",
+		CloudConfig: "aws",
+	})
 })

@@ -48,25 +48,25 @@ func (g *genesis) init() {
 		"--directory", "deployments",
 	).Run()
 	Expect(err).ToNot(HaveOccurred())
-}
 
-func (g *genesis) Manifest() []byte {
 	g.logger.Println(fmt.Sprintf("copying environment file %s into workdir: %s",
 		g.environment.manifest(), g.deploymentsDir()))
 	env := fmt.Sprintf("%s.yml", g.environment.Name)
 	envFile := filepath.Join(g.deploymentsDir(), env)
 	copyFile(g.environment.manifest(), envFile)
+}
 
+func (g *genesis) Manifest() []byte {
 	g.logger.Println(fmt.Sprintf("generating manifest for: %s", g.environment.Name))
 	args := []string{
 		"manifest",
 		"--cwd", g.deploymentsDir(),
 		"--no-redact",
 	}
-	if g.environment.cloudConfig() != "" {
-		args = append(args, "--cloud-config", g.environment.cloudConfig())
+	if g.environment.cloudConfigManifest() != "" {
+		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
 	}
-	args = append(args, env)
+	args = append(args, g.environment.Name)
 	cmd := g.genesis(args...)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
@@ -75,6 +75,20 @@ func (g *genesis) Manifest() []byte {
 		Expect("failed to render manifest").To(BeNil())
 	}
 	return buf.Bytes()
+}
+
+func (g *genesis) AddSecrets() {
+	g.logger.Println(fmt.Sprintf("adding secrets for: %s", g.environment.Name))
+	args := []string{
+		"add-secrets",
+		"--cwd", g.deploymentsDir(),
+		g.environment.Name,
+	}
+	cmd := g.genesis(args...)
+	cmd.Run()
+	if cmd.ProcessState.ExitCode() != 0 {
+		Expect("failed to add secrets to vault").To(BeNil())
+	}
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {

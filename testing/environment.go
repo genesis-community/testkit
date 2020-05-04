@@ -6,21 +6,21 @@ import (
 )
 
 type Environment struct {
-	Name            string
-	CloudConfigName string
-	Focus           bool
+	Name        string
+	CloudConfig string
+	Focus       bool
 }
 
 func (e Environment) manifest() string {
 	return e.filePathForDir("deployments")
 }
 
-func (e Environment) cloudConfig() string {
-	if e.CloudConfigName == "" {
+func (e Environment) cloudConfigManifest() string {
+	if e.CloudConfig == "" {
 		return ""
 	} else {
 		return filepath.Join(KitDir, "spec", "cloud_configs",
-			fmt.Sprintf("%s.yml", e.CloudConfigName))
+			fmt.Sprintf("%s.yml", e.CloudConfig))
 	}
 }
 

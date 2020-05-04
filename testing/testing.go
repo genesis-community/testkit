@@ -27,21 +27,20 @@ func Test(e Environment) {
 
 			logger = log.New(GinkgoWriter, fmt.Sprintf("deployment(%s) ", e.Name), 0)
 
-			v = newVault(e.vaultStub(), workDir, logger)
+			v = newVault(workDir, logger)
 			v.Start()
 
 			g = newGenesis(e, workDir, logger)
+
+			createVaultStubIffMissing(e.vaultStub(), v, g, logger)
+
+			v.Import(e.vaultStub())
 		})
 
 		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
 			manifest := g.Manifest()
-			if _, err := os.Stat(e.result()); os.IsNotExist(err) {
-				logger.Printf("creating new result file: %s", e.result())
-				err = os.MkdirAll(filepath.Dir(e.result()), 0755)
-				Expect(err).ToNot(HaveOccurred())
-				err = ioutil.WriteFile(e.result(), manifest, 0644)
-				Expect(err).ToNot(HaveOccurred())
-			}
+
+			createResultIfMissingForManifest(e.result(), manifest, logger)
 			result, err := ioutil.ReadFile(e.result())
 			Expect(err).ToNot(HaveOccurred())
 
@@ -62,4 +61,26 @@ func context(focus bool, description string, what func()) {
 	} else {
 		Context(description, what)
 	}
+}
+
+func createResultIfMissingForManifest(result string, manifest []byte, logger *log.Logger) {
+	if _, err := os.Stat(result); os.IsNotExist(err) {
+		logger.Printf("creating new result file: %s", result)
+		createParentDirsAndWriteFile(result, manifest)
+	}
+}
+
+func createVaultStubIffMissing(vaultStub string, v *vault, g *genesis, logger *log.Logger) {
+	if _, err := os.Stat(vaultStub); os.IsNotExist(err) {
+		logger.Printf("adding secrets to stub: %s", vaultStub)
+		g.AddSecrets()
+		createParentDirsAndWriteFile(vaultStub, v.Export())
+	}
+}
+
+func createParentDirsAndWriteFile(file string, content []byte) {
+	err := os.MkdirAll(filepath.Dir(file), 0755)
+	Expect(err).ToNot(HaveOccurred())
+	err = ioutil.WriteFile(file, content, 0644)
+	Expect(err).ToNot(HaveOccurred())
 }

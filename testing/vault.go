@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,15 +15,13 @@ import (
 )
 
 type vault struct {
-	stub    string
 	homeDir string
 	logger  *log.Logger
 	server  *exec.Cmd
 }
 
-func newVault(stub string, homeDir string, logger *log.Logger) *vault {
+func newVault(homeDir string, logger *log.Logger) *vault {
 	v := vault{
-		stub:    stub,
 		homeDir: homeDir,
 		logger:  logger,
 	}
@@ -44,14 +43,32 @@ func (v *vault) Start() {
 		return s.ProcessState.ExitCode()
 	}, "2s", "100ms").Should(Equal(0))
 
+}
+
+func (v *vault) Import(s string) {
 	v.logger.Println("Importing vault stub")
-	stub, err := os.Open(v.stub)
+	stub, err := os.Open(s)
+	defer stub.Close()
 	Expect(err).ToNot(HaveOccurred())
 
-	i := v.safe("import")
-	i.Stdin = stub
-	err = i.Run()
-	Expect(err).ToNot(HaveOccurred())
+	cmd := v.safe("import")
+	cmd.Stdin = stub
+	cmd.Run()
+	if cmd.ProcessState.ExitCode() != 0 {
+		Expect(fmt.Sprintf("failed to import: %s into vault", stub)).To(BeNil())
+	}
+}
+
+func (v *vault) Export() []byte {
+	v.logger.Println("Exporting vault stub")
+	cmd := v.safe("export", "/")
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	cmd.Run()
+	if cmd.ProcessState.ExitCode() != 0 {
+		Expect("failed to export vault").To(BeNil())
+	}
+	return buf.Bytes()
 }
 
 func (v *vault) Stop() {
