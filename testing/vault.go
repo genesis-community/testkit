@@ -2,12 +2,15 @@ package testing
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/itchyny/gojq"
 
 	"gopkg.in/yaml.v2"
 
@@ -68,7 +71,8 @@ func (v *vault) Export() []byte {
 	if cmd.ProcessState.ExitCode() != 0 {
 		Expect("failed to export vault").To(BeNil())
 	}
-	return buf.Bytes()
+
+	return stubValues(buf.Bytes())
 }
 
 func (v *vault) Stop() {
@@ -93,4 +97,43 @@ func GetCurrentVaultTarget(homeDir string) string {
 	err = yaml.Unmarshal(raw, &config)
 	Expect(err).ToNot(HaveOccurred())
 	return config.Current
+}
+
+func stubValues(in []byte) []byte {
+	input := make(map[string]interface{})
+	err := json.Unmarshal(in, &input)
+	Expect(err).ToNot(HaveOccurred())
+
+	// Replace values of export with string containing the full vault path
+	query, err := gojq.Parse(`
+          to_entries
+            | map(
+              .key as $p |
+              .value = (
+                .value | to_entries
+                  | map(.value = "STUB \($p):\(.key)")
+                | from_entries
+              )
+            )
+          | from_entries`,
+	)
+	Expect(err).ToNot(HaveOccurred())
+
+	var buf bytes.Buffer
+
+	iter := query.Run(input)
+	for {
+		v, ok := iter.Next()
+		if !ok {
+			break
+		}
+		if err, ok := v.(error); ok {
+			Expect(err).ToNot(HaveOccurred())
+		}
+		out, err := json.Marshal(v)
+		Expect(err).ToNot(HaveOccurred())
+		_, err = buf.Write(out)
+		Expect(err).ToNot(HaveOccurred())
+	}
+	return buf.Bytes()
 }
