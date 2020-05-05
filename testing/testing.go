@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -34,9 +35,12 @@ func Test(e Environment) {
 
 			g = newGenesis(e, workDir, logger)
 
-			createVaultCacheIffMissing(e.vaultCache(), e.vaultProvided(), v, g, logger)
+			createVaultCacheIffMissing(e.vaultCache(), v, g, logger)
 
-			v.Import(e.vaultCache())
+			cache, err := os.Open(e.vaultCache())
+			Expect(err).ToNot(HaveOccurred())
+			defer cache.Close()
+			v.Import(cache)
 		})
 
 		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
@@ -72,10 +76,10 @@ func createResultIfMissingForManifest(result string, manifest []byte, logger *lo
 	}
 }
 
-func createVaultCacheIffMissing(vaultCache string, vaultProvided string, v *vault, g *genesis, logger *log.Logger) {
-	if _, err := os.Stat(vaultProvided); err == nil {
-		logger.Printf("detected: %s loading before adding secrets", vaultProvided)
-		v.Import(vaultProvided)
+func createVaultCacheIffMissing(vaultCache string, v *vault, g *genesis, logger *log.Logger) {
+	if vaultProvided := g.ProvidedSecretsStub(); len(vaultProvided) != 0 {
+		logger.Printf("detected provided secrets importing:\n%s", vaultProvided)
+		v.Import(bytes.NewBuffer(vaultProvided))
 	}
 	if _, err := os.Stat(vaultCache); os.IsNotExist(err) {
 		logger.Printf("adding secrets to stub: %s", vaultCache)

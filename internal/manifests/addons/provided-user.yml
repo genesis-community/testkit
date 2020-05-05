@@ -1,5 +1,5 @@
 params:
   users:
-    - name: (( vault "secret/ci/baseline/jumpbox/provided-user:user" ))
+    - name: (( vault meta.vault "/base:user" ))
       shell: /bin/bash
-      password: (( vault "secret/ci/baseline/jumpbox/provided-user:password" ))
+      password: (( vault meta.vault "/base:password" ))

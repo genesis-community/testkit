@@ -4,13 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/itchyny/gojq"
 
 	"gopkg.in/yaml.v2"
 
@@ -48,9 +47,8 @@ func (v *vault) Start() {
 
 }
 
-func (v *vault) Import(s string) {
-	v.logger.Println("Importing vault stub")
-	stub, err := ioutil.ReadFile(s)
+func (v *vault) Import(i io.Reader) {
+	stub, err := ioutil.ReadAll(i)
 	Expect(err).ToNot(HaveOccurred())
 
 	tmp := map[string]map[string]string{}
@@ -111,7 +109,7 @@ func stubValues(in []byte) []byte {
 	Expect(err).ToNot(HaveOccurred())
 
 	// Replace values of export with string containing the full vault path
-	query, err := gojq.Parse(`
+	return jq{query: `
           to_entries
             | map(
               .key as $p |
@@ -122,24 +120,5 @@ func stubValues(in []byte) []byte {
               )
             )
           | from_entries`,
-	)
-	Expect(err).ToNot(HaveOccurred())
-
-	var buf bytes.Buffer
-
-	iter := query.Run(input)
-	for {
-		v, ok := iter.Next()
-		if !ok {
-			break
-		}
-		if err, ok := v.(error); ok {
-			Expect(err).ToNot(HaveOccurred())
-		}
-		out, err := yaml.Marshal(v)
-		Expect(err).ToNot(HaveOccurred())
-		_, err = buf.Write(out)
-		Expect(err).ToNot(HaveOccurred())
-	}
-	return buf.Bytes()
+	}.Run(input)
 }

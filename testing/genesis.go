@@ -2,20 +2,36 @@ package testing
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	. "github.com/onsi/gomega"
+
+	// gojq only works with v3
+	"gopkg.in/yaml.v3"
 )
 
 type genesis struct {
 	environment Environment
 	workDir     string
 	logger      *log.Logger
+}
+
+type kit struct {
+	Name     string                 `yaml:"name"`
+	Provided map[string]interface{} `yaml:"provided"`
+}
+
+type env struct {
+	Kit struct {
+		Features []string `yaml:"features`
+	} `yaml:"kit"`
 }
 
 func (g *genesis) deploymentsDir() string {
@@ -56,6 +72,24 @@ func (g *genesis) init() {
 	copyFile(g.environment.manifest(), envFile)
 }
 
+func (g *genesis) kit() kit {
+	k := kit{}
+	raw, err := ioutil.ReadFile(filepath.Join(KitDir, "kit.yml"))
+	Expect(err).ToNot(HaveOccurred())
+	err = yaml.Unmarshal(raw, &k)
+	Expect(err).ToNot(HaveOccurred())
+	return k
+}
+
+func (g *genesis) env() env {
+	e := env{}
+	raw, err := ioutil.ReadFile(g.environment.manifest())
+	Expect(err).ToNot(HaveOccurred())
+	err = yaml.Unmarshal(raw, &e)
+	Expect(err).ToNot(HaveOccurred())
+	return e
+}
+
 func (g *genesis) Manifest() []byte {
 	g.logger.Println(fmt.Sprintf("generating manifest for: %s", g.environment.Name))
 	args := []string{
@@ -77,6 +111,29 @@ func (g *genesis) Manifest() []byte {
 	return buf.Bytes()
 }
 
+func (g *genesis) ProvidedSecretsStub() []byte {
+	rawFeatures, err := json.Marshal(g.env().Kit.Features)
+	Expect(err).ToNot(HaveOccurred())
+
+	return jq{
+		query: `with_entries(
+                          select([.key] | inside($features|fromjson))
+                        )
+                        | reduce .[] as $item ({}; . * $item)
+                        | with_entries(
+                          .key as $p
+                          | {
+                            key: "\($base)/\(.key)",
+                            value: .value.keys | with_entries(
+                              .value = "STUB \($p):\(.key)"
+                            )
+                          }
+                        )`,
+		variables: []string{"$base", "$features"},
+		values:    []interface{}{g.base(), string(rawFeatures)},
+	}.Run(g.kit().Provided)
+}
+
 func (g *genesis) AddSecrets() {
 	args := []string{
 		"add-secrets",
@@ -88,6 +145,11 @@ func (g *genesis) AddSecrets() {
 	if cmd.ProcessState.ExitCode() != 0 {
 		Expect("failed to add secrets to vault").To(BeNil())
 	}
+}
+
+func (g *genesis) base() string {
+	return fmt.Sprintf("secret/%s/%s",
+		strings.Replace(g.environment.Name, "-", "/", -1), g.kit().Name)
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {

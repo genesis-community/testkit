@@ -1,5 +1,5 @@
 ---
-name:     jumpbox
+name:     internal
 version:  1.0.10
 authors:  [ James Hunt <jhunt@starkandwayne.com>,
             Dennis Bell <dbell@starkandwayne.com> ]
@@ -30,14 +30,20 @@ certificates:
 
 credentials:
   openvpn:
-    openvpn/dh_params: dhparams 2048
+    openvpn/dh_params: dhparams 256
 
 provided:
   provided-user:
-    provided-user:
+    base:
       keys:
         user:
           sensitive: false
           prompt:    Username for jumpbox user
         password:
           prompt:    Password for jumpbox user
+
+  provided-key:
+    base:
+      keys:
+        ssh-key:
+          prompt:    SSH key for jumpbox

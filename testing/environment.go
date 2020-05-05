@@ -24,12 +24,8 @@ func (e Environment) cloudConfigManifest() string {
 	}
 }
 
-func (e Environment) vaultProvided() string {
-	return e.filePathForDir("vault", e.Name+"-provided")
-}
-
 func (e Environment) vaultCache() string {
-	return e.filePathForDir("vault", e.Name+"-cache")
+	return e.filePathForDir("vault", e.Name)
 }
 
 func (e Environment) result() string {

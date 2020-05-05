@@ -1,0 +1,5 @@
+secret/handshake:
+  knock: STUB secret/handshake:knock
+secret/provided/user/internal/base:
+  password: STUB secret/provided/user/internal/base:password
+  user: STUB secret/provided/user/internal/base:user
