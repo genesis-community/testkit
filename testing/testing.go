@@ -9,6 +9,8 @@ import (
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+
+	dyff "github.com/genesis-community/testkit/dyff_yaml_matcher"
 )
 
 func Test(e Environment) {
@@ -44,7 +46,7 @@ func Test(e Environment) {
 			result, err := ioutil.ReadFile(e.result())
 			Expect(err).ToNot(HaveOccurred())
 
-			Expect(manifest).To(MatchYAML(result))
+			Expect(manifest).To(dyff.MatchYAML(result))
 		})
 
 		AfterEach(func() {
