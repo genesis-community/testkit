@@ -41,13 +41,13 @@ func (matcher *dyffYAMLMatcher) Match(actual interface{}) (success bool, err err
 	}
 
 	matcher.report, err = dyff.CompareInputFiles(ytbx.InputFile{
-		Location:  "actual",
-		Note:      "the given YAML",
-		Documents: actualYAML,
-	}, ytbx.InputFile{
 		Location:  "expected",
 		Note:      "the desired YAML",
 		Documents: expectedYAML,
+	}, ytbx.InputFile{
+		Location:  "actual",
+		Note:      "the given YAML",
+		Documents: actualYAML,
 	})
 	if err != nil {
 		return false, err
