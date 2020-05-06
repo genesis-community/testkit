@@ -1,3 +1,5 @@
+secret/handshake:
+  knock: <!secret/handshake:knock!>
 secret/provided/user/internal/base:
   password: <!{meta.vault}/base:password!>
   user: <!{meta.vault}/base:user!>

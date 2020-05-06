@@ -124,7 +124,7 @@ func (g *genesis) ProvidedSecretsStub() []byte {
                           | {
                             key: "\($base)/\(.key)",
                             value: .value.keys | with_entries(
-                              .value = "{| \($base)/\($p):\(.key) |}"
+                              .value = "<!{meta.vault}/\($p):\(.key)!>"
                             )
                           }
                         )`,
@@ -164,7 +164,10 @@ func (g *genesis) genesis(arg ...string) *exec.Cmd {
 	cmd := exec.Command("genesis", arg...)
 	cmd.Stdout = g.logger.Writer()
 	cmd.Stderr = g.logger.Writer()
-	cmd.Env = append(os.Environ(), fmt.Sprintf("HOME=%s", g.workDir))
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("HOME=%s", g.workDir),
+		fmt.Sprintf("GENESIS_TESTING_BOSH_CPI=%s", g.environment.CPI),
+	)
 	return cmd
 }
 

@@ -8,6 +8,7 @@ import (
 type Environment struct {
 	Name        string
 	CloudConfig string
+	CPI         string
 	Focus       bool
 }
 
