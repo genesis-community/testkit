@@ -115,7 +115,7 @@ func stubValues(in []byte) []byte {
               .key as $p |
               .value = (
                 .value | to_entries
-                  | map(.value = "|| STUB \($p):\(.key) ||")
+                  | map(.value = "{| \($p):\(.key) |}")
                 | from_entries
               )
             )

@@ -1,14 +1,14 @@
 secret/handshake:
-  knock: '|| STUB secret/handshake:knock ||'
+  knock: '{| secret/handshake:knock |}'
 secret/openvpn/internal/openvpn/certs/ca:
-  certificate: '|| STUB secret/openvpn/internal/openvpn/certs/ca:certificate ||'
-  combined: '|| STUB secret/openvpn/internal/openvpn/certs/ca:combined ||'
-  crl: '|| STUB secret/openvpn/internal/openvpn/certs/ca:crl ||'
-  key: '|| STUB secret/openvpn/internal/openvpn/certs/ca:key ||'
-  serial: '|| STUB secret/openvpn/internal/openvpn/certs/ca:serial ||'
+  certificate: '{| secret/openvpn/internal/openvpn/certs/ca:certificate |}'
+  combined: '{| secret/openvpn/internal/openvpn/certs/ca:combined |}'
+  crl: '{| secret/openvpn/internal/openvpn/certs/ca:crl |}'
+  key: '{| secret/openvpn/internal/openvpn/certs/ca:key |}'
+  serial: '{| secret/openvpn/internal/openvpn/certs/ca:serial |}'
 secret/openvpn/internal/openvpn/certs/server:
-  certificate: '|| STUB secret/openvpn/internal/openvpn/certs/server:certificate ||'
-  combined: '|| STUB secret/openvpn/internal/openvpn/certs/server:combined ||'
-  key: '|| STUB secret/openvpn/internal/openvpn/certs/server:key ||'
+  certificate: '{| secret/openvpn/internal/openvpn/certs/server:certificate |}'
+  combined: '{| secret/openvpn/internal/openvpn/certs/server:combined |}'
+  key: '{| secret/openvpn/internal/openvpn/certs/server:key |}'
 secret/openvpn/internal/openvpn/dh_params:
-  dhparam-pem: '|| STUB secret/openvpn/internal/openvpn/dh_params:dhparam-pem ||'
+  dhparam-pem: '{| secret/openvpn/internal/openvpn/dh_params:dhparam-pem |}'

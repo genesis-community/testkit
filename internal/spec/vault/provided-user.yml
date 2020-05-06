@@ -1,5 +1,5 @@
 secret/handshake:
-  knock: '|| STUB secret/handshake:knock ||'
+  knock: '{| secret/handshake:knock |}'
 secret/provided/user/internal/base:
-  password: '|| STUB secret/provided/user/internal/base:password ||'
-  user: '|| STUB secret/provided/user/internal/base:user ||'
+  password: '{| secret/provided/user/internal/base:password |}'
+  user: '{| secret/provided/user/internal/base:user |}'

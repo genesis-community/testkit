@@ -1,2 +1,2 @@
 secret/handshake:
-  knock: '|| STUB secret/handshake:knock ||'
+  knock: '{| secret/handshake:knock |}'
