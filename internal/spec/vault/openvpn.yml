@@ -1,14 +1,12 @@
-secret/handshake:
-  knock: '{| secret/handshake:knock |}'
 secret/openvpn/internal/openvpn/certs/ca:
-  certificate: '{| secret/openvpn/internal/openvpn/certs/ca:certificate |}'
-  combined: '{| secret/openvpn/internal/openvpn/certs/ca:combined |}'
-  crl: '{| secret/openvpn/internal/openvpn/certs/ca:crl |}'
-  key: '{| secret/openvpn/internal/openvpn/certs/ca:key |}'
-  serial: '{| secret/openvpn/internal/openvpn/certs/ca:serial |}'
+  certificate: <!{meta.vault}/openvpn/certs/ca:certificate!>
+  combined: <!{meta.vault}/openvpn/certs/ca:combined!>
+  crl: <!{meta.vault}/openvpn/certs/ca:crl!>
+  key: <!{meta.vault}/openvpn/certs/ca:key!>
+  serial: <!{meta.vault}/openvpn/certs/ca:serial!>
 secret/openvpn/internal/openvpn/certs/server:
-  certificate: '{| secret/openvpn/internal/openvpn/certs/server:certificate |}'
-  combined: '{| secret/openvpn/internal/openvpn/certs/server:combined |}'
-  key: '{| secret/openvpn/internal/openvpn/certs/server:key |}'
+  certificate: <!{meta.vault}/openvpn/certs/server:certificate!>
+  combined: <!{meta.vault}/openvpn/certs/server:combined!>
+  key: <!{meta.vault}/openvpn/certs/server:key!>
 secret/openvpn/internal/openvpn/dh_params:
-  dhparam-pem: '{| secret/openvpn/internal/openvpn/dh_params:dhparam-pem |}'
+  dhparam-pem: <!{meta.vault}/openvpn/dh_params:dhparam-pem!>

@@ -66,7 +66,7 @@ func (v *vault) Import(i io.Reader) {
 	}
 }
 
-func (v *vault) Export() []byte {
+func (v *vault) Export(path string) []byte {
 	v.logger.Println("Exporting vault stub")
 	cmd := v.safe("export", "/")
 	var buf bytes.Buffer
@@ -76,7 +76,7 @@ func (v *vault) Export() []byte {
 		Expect("failed to export vault").To(BeNil())
 	}
 
-	return stubValues(buf.Bytes())
+	return stubValues(buf.Bytes(), path)
 }
 
 func (v *vault) Stop() {
@@ -103,22 +103,25 @@ func GetCurrentVaultTarget(homeDir string) string {
 	return config.Current
 }
 
-func stubValues(in []byte) []byte {
+func stubValues(in []byte, path string) []byte {
 	input := make(map[string]interface{})
 	err := json.Unmarshal(in, &input)
 	Expect(err).ToNot(HaveOccurred())
 
 	// Replace values of export with string containing the full vault path
-	return jq{query: `
-          to_entries
-            | map(
-              .key as $p |
-              .value = (
-                .value | to_entries
-                  | map(.value = "{| \($p):\(.key) |}")
-                | from_entries
-              )
-            )
-          | from_entries`,
+	return jq{
+		query: `
+		  to_entries
+		    | map(
+		      .key as $p |
+		      .value = (
+			.value | to_entries
+			  | map(.value = "<!\($p | sub($base; "{meta.vault}")):\(.key)!>")
+			| from_entries
+		      )
+		    )
+		  | from_entries`,
+		variables: []string{"$base"},
+		values:    []interface{}{path},
 	}.Run(input)
 }

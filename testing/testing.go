@@ -84,7 +84,7 @@ func createVaultCacheIffMissing(vaultCache string, v *vault, g *genesis, logger 
 	if _, err := os.Stat(vaultCache); os.IsNotExist(err) {
 		logger.Printf("adding secrets to stub: %s", vaultCache)
 		g.AddSecrets()
-		createParentDirsAndWriteFile(vaultCache, v.Export())
+		createParentDirsAndWriteFile(vaultCache, v.Export(g.base()))
 	}
 }
 
