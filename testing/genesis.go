@@ -24,7 +24,6 @@ type genesis struct {
 }
 
 type kit struct {
-	Name     string                 `yaml:"name"`
 	Provided map[string]interface{} `yaml:"provided"`
 }
 
@@ -149,7 +148,8 @@ func (g *genesis) AddSecrets() {
 
 func (g *genesis) base() string {
 	return fmt.Sprintf("secret/%s/%s",
-		strings.Replace(g.environment.Name, "-", "/", -1), g.kit().Name)
+		strings.Replace(g.environment.Name, "-", "/", -1),
+		filepath.Base(KitDir))
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {

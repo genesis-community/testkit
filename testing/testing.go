@@ -25,7 +25,7 @@ func Test(e Environment) {
 
 		BeforeEach(func() {
 			var err error
-			workDir, err = ioutil.TempDir(os.TempDir(), "*-salvation-home")
+			workDir, err = ioutil.TempDir(os.TempDir(), "*-testkit-home")
 			Expect(err).ToNot(HaveOccurred())
 
 			logger = log.New(GinkgoWriter, fmt.Sprintf("deployment(%s) ", e.Name), 0)
