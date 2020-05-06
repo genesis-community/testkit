@@ -10,8 +10,8 @@ instance_groups:
           TMPDIR: /var/vcap/data/root_tmp
         hostname: provided-user-jumpbox
         users:
-        - name: STUB secret/provided/user/internal/base:user
-          password: STUB secret/provided/user/internal/base:password
+        - name: '|| STUB secret/provided/user/internal/base:user ||'
+          password: '|| STUB secret/provided/user/internal/base:password ||'
           shell: /bin/bash
     release: jumpbox
   - name: inventory

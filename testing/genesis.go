@@ -124,7 +124,7 @@ func (g *genesis) ProvidedSecretsStub() []byte {
                           | {
                             key: "\($base)/\(.key)",
                             value: .value.keys | with_entries(
-                              .value = "STUB \($base)/\($p):\(.key)"
+                              .value = "|| STUB \($base)/\($p):\(.key) ||"
                             )
                           }
                         )`,

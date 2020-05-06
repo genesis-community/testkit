@@ -23,7 +23,7 @@ instance_groups:
     properties:
       cipher: AES-256-CBC
       compress: auto
-      dh_pem: STUB secret/openvpn/internal/openvpn/dh_params:dhparam-pem
+      dh_pem: '|| STUB secret/openvpn/internal/openvpn/dh_params:dhparam-pem ||'
       extra_configs: []
       port: 443
       protocol: tcp
@@ -37,11 +37,12 @@ instance_groups:
       - test client_route_1
       - test client_route_2
       server: 172.31.255.0 255.255.255.0
-      tls_crl: STUB secret/openvpn/internal/openvpn/certs/ca:crl
+      tls_crl: '|| STUB secret/openvpn/internal/openvpn/certs/ca:crl ||'
       tls_server:
-        ca: STUB secret/openvpn/internal/openvpn/certs/ca:certificate
-        certificate: STUB secret/openvpn/internal/openvpn/certs/server:certificate
-        private_key: STUB secret/openvpn/internal/openvpn/certs/server:key
+        ca: '|| STUB secret/openvpn/internal/openvpn/certs/ca:certificate ||'
+        certificate: '|| STUB secret/openvpn/internal/openvpn/certs/server:certificate
+          ||'
+        private_key: '|| STUB secret/openvpn/internal/openvpn/certs/server:key ||'
       tls_version_min: "1.2"
     release: openvpn
   - name: iptables
