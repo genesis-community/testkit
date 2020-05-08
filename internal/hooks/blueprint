@@ -12,7 +12,7 @@ set -e
 
 declare -a merge
 
-validate_features openvpn bastion provided-user \
+validate_features openvpn bastion provided-user detect-cpi \
                   proxy azure shield # defunct
 
 merge=( manifests/jumpbox.yml )
@@ -24,11 +24,15 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     ;;
 
   provided-user)
-      merge+=( "manifests/addons/$want.yml" )
-      ;;
+    merge+=( "manifests/addons/$want.yml" )
+    ;;
 
   bastion)
     merge+=( manifests/bastion.yml )
+    ;;
+
+  detect-cpi)
+    cpi="$(bosh_cpi)"
     ;;
 
   shield)

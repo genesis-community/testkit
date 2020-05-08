@@ -26,4 +26,9 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "provided-user",
 		CloudConfig: "aws",
 	})
+	Test(Environment{
+		Name:        "detect-cpi",
+		CloudConfig: "aws",
+		CPI:         "aws",
+	})
 })
