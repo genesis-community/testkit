@@ -23,6 +23,11 @@ type genesis struct {
 	logger      *log.Logger
 }
 
+type manifestResult struct {
+	raw           []byte
+	boshVariables []byte
+}
+
 type kit struct {
 	Provided map[string]interface{} `yaml:"provided"`
 }
@@ -89,12 +94,38 @@ func (g *genesis) env() env {
 	return e
 }
 
-func (g *genesis) Manifest() []byte {
+func (g *genesis) Manifest() manifestResult {
 	g.logger.Println(fmt.Sprintf("generating manifest for: %s", g.environment.Name))
+	raw := g.runManifest(true)
+	all := g.runManifest(false)
+
+	return manifestResult{
+		raw:           raw,
+		boshVariables: extractBoshVariables(all),
+	}
+}
+
+func extractBoshVariables(raw []byte) []byte {
+	bv := struct {
+		BoshVariables map[string]interface{} `yaml:"bosh-variables",omitempty`
+	}{}
+	err := yaml.Unmarshal(raw, &bv)
+	Expect(err).ToNot(HaveOccurred())
+
+	bvo, err := yaml.Marshal(bv.BoshVariables)
+	Expect(err).ToNot(HaveOccurred())
+
+	return bvo
+}
+
+func (g *genesis) runManifest(prune bool) []byte {
 	args := []string{
 		"manifest",
 		"--cwd", g.deploymentsDir(),
 		"--no-redact",
+	}
+	if !prune {
+		args = append(args, "--no-prune")
 	}
 	if g.environment.cloudConfigManifest() != "" {
 		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())

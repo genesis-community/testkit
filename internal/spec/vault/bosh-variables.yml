@@ -1,0 +1,4 @@
+secret/bosh/variables/internal/host:
+  name: <!{meta.vault}/host:name!>
+secret/handshake:
+  knock: <!secret/handshake:knock!>

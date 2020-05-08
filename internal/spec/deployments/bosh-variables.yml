@@ -1,0 +1,14 @@
+kit:
+  name: dev
+  features:
+  - bosh-variables
+
+genesis:
+  env:      bosh-variables
+
+params:
+  availability_zones: [z1]
+
+  users:
+  - name: test-user
+    shell: /bin/bash

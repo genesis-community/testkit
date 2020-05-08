@@ -1,0 +1,10 @@
+instance_groups:
+  - name: jumpbox
+    jobs:
+    - name: jumpbox
+      properties:
+        jumpbox:
+          hostname: ((hostname))
+
+bosh-variables:
+  hostname: (( vault meta.vault "/host:name" ))

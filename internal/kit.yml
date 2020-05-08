@@ -32,6 +32,10 @@ credentials:
   openvpn:
     openvpn/dh_params: dhparams 256
 
+  bosh-variables:
+    host:
+      name: random 64
+
 provided:
   provided-user:
     base:

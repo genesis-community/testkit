@@ -3,6 +3,11 @@ module github.com/genesis-community/testkit
 go 1.14
 
 require (
+	github.com/bmatcuk/doublestar v1.3.0 // indirect
+	github.com/charlievieth/fs v0.0.0-20170613215519-7dc373669fa1 // indirect
+	github.com/cloudfoundry/bosh-cli v6.2.1+incompatible
+	github.com/cloudfoundry/bosh-utils v0.0.0-20200429181937-96357f638e8c // indirect
+	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/gonvenience/ytbx v1.2.2
 	github.com/homeport/dyff v1.0.2
 	github.com/itchyny/gojq v0.10.1

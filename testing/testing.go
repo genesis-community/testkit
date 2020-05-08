@@ -19,6 +19,7 @@ func Test(e Environment) {
 		var (
 			v       *vault
 			g       *genesis
+			b       *bosh
 			workDir string
 			logger  *log.Logger
 		)
@@ -35,6 +36,8 @@ func Test(e Environment) {
 
 			g = newGenesis(e, workDir, logger)
 
+			b = newBosh(e, workDir, logger)
+
 			createVaultCacheIffMissing(e.vaultCache(), v, g, logger)
 
 			cache, err := os.Open(e.vaultCache())
@@ -44,7 +47,8 @@ func Test(e Environment) {
 		})
 
 		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
-			manifest := g.Manifest()
+			manifestResult := g.Manifest()
+			manifest := b.Interpolate(manifestResult.raw, manifestResult.boshVariables)
 
 			createResultIfMissingForManifest(e.result(), manifest, logger)
 			result, err := ioutil.ReadFile(e.result())
