@@ -13,8 +13,16 @@ import (
 
 	"gopkg.in/yaml.v2"
 
+	"github.com/gofrs/flock"
+
 	. "github.com/onsi/gomega"
 )
+
+var vaultStartLock *flock.Flock
+
+func init() {
+	vaultStartLock = flock.NewFlock(filepath.Join(KitDir, ".testing_vault_start_lock"))
+}
 
 type vault struct {
 	homeDir string
@@ -32,6 +40,8 @@ func newVault(homeDir string, logger *log.Logger) *vault {
 }
 
 func (v *vault) Start() {
+	vaultStartLock.Lock()
+	defer vaultStartLock.Unlock()
 	v.logger.Println("Starting vault")
 	err := v.server.Start()
 	Expect(err).ToNot(HaveOccurred())
