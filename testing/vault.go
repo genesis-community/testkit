@@ -10,39 +10,45 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sync/atomic"
+	"syscall"
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/gofrs/flock"
-
+	"github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 )
 
-var vaultStartLock *flock.Flock
+var port *int32
 
 func init() {
-	vaultStartLock = flock.NewFlock(filepath.Join(KitDir, ".testing_vault_start_lock"))
+	p := int32(0)
+	port = &p
 }
 
 type vault struct {
 	homeDir string
 	logger  *log.Logger
 	server  *exec.Cmd
+	port    int32
 }
 
 func newVault(homeDir string, logger *log.Logger) *vault {
+	atomic.CompareAndSwapInt32(port, 0, 8200+(int32(config.GinkgoConfig.ParallelNode)*10))
+	p := atomic.AddInt32(port, 1)
 	v := vault{
 		homeDir: homeDir,
 		logger:  logger,
+		port:    p,
 	}
-	v.server = v.safe("local", "--memory")
+	v.server = v.safe("local", "--memory", "--port",
+		fmt.Sprintf("%d", p))
 	return &v
 }
 
 func (v *vault) Start() {
-	vaultStartLock.Lock()
-	defer vaultStartLock.Unlock()
-	v.logger.Println("Starting vault")
+	v.logger.Printf("Running on node: %d", config.GinkgoConfig.ParallelNode)
+	v.logger.Printf("Starting vault at port: %d", v.port)
 	err := v.server.Start()
 	Expect(err).ToNot(HaveOccurred())
 
@@ -90,15 +96,17 @@ func (v *vault) Export(path string) []byte {
 }
 
 func (v *vault) Stop() {
-	err := v.server.Process.Kill()
-	Expect(err).ToNot(HaveOccurred())
+	syscall.Kill(-v.server.Process.Pid, syscall.SIGKILL)
 }
 
 func (v *vault) safe(arg ...string) *exec.Cmd {
 	cmd := exec.Command("safe", arg...)
 	cmd.Stdout = v.logger.Writer()
 	cmd.Stderr = v.logger.Writer()
-	cmd.Env = append(os.Environ(), fmt.Sprintf("HOME=%s", v.homeDir))
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Env = append(os.Environ(),
+		fmt.Sprintf("HOME=%s", v.homeDir),
+	)
 	return cmd
 }
 
