@@ -14,7 +14,7 @@ vm_types:
   cloud_properties:
     instance_type: m5.large
     ephemeral_disk: {size: 25_000}
-- name: large
+- name: jumpbox
   cloud_properties:
     instance_type: m5.xlarge
     ephemeral_disk: {size: 50_000}
@@ -22,7 +22,7 @@ vm_types:
 disk_types:
 - name: default
   disk_size: 3000
-- name: large
+- name: jumpbox
   disk_size: 50_000
 
 networks:

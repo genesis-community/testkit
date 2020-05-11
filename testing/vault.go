@@ -77,9 +77,7 @@ func (v *vault) Import(i io.Reader) {
 	cmd := v.safe("import")
 	cmd.Stdin = bytes.NewBuffer(stubJson)
 	cmd.Run()
-	if cmd.ProcessState.ExitCode() != 0 {
-		Expect(fmt.Sprintf("failed to import: %s into vault", stub)).To(BeNil())
-	}
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 }
 
 func (v *vault) Export(path string) []byte {
@@ -88,9 +86,7 @@ func (v *vault) Export(path string) []byte {
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Run()
-	if cmd.ProcessState.ExitCode() != 0 {
-		Expect("failed to export vault").To(BeNil())
-	}
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 
 	return stubValues(buf.Bytes(), path)
 }

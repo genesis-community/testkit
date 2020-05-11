@@ -39,9 +39,7 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte) []byte {
 	cmd.Stdout = &buf
 	cmd.Run()
 
-	if cmd.ProcessState.ExitCode() != 0 {
-		Expect("failed to interpolate bosh manifest").To(BeNil())
-	}
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 	return buf.Bytes()
 }
 

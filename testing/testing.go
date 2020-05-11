@@ -46,6 +46,10 @@ func Test(e Environment) {
 			v.Import(cache)
 		})
 
+		It(fmt.Sprintf("passes pre-flight check: %s", e.result()), func() {
+			g.Check()
+		})
+
 		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
 			manifestResult := g.Manifest()
 			manifest := b.Interpolate(manifestResult.raw, manifestResult.boshVariables)

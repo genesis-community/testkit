@@ -94,6 +94,23 @@ func (g *genesis) env() env {
 	return e
 }
 
+func (g *genesis) Check() {
+	g.logger.Println(fmt.Sprintf("running genesis check for: %s", g.environment.Name))
+	args := []string{
+		"check",
+		"--cwd", g.deploymentsDir(),
+		"--no-manifest",
+		"--no-stemcells",
+	}
+	if g.environment.cloudConfigManifest() != "" {
+		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
+	}
+	args = append(args, g.environment.Name)
+	cmd := g.genesis(args...)
+	cmd.Run()
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
+}
+
 func (g *genesis) Manifest() manifestResult {
 	g.logger.Println(fmt.Sprintf("generating manifest for: %s", g.environment.Name))
 	raw := g.runManifest(true)
@@ -135,9 +152,7 @@ func (g *genesis) runManifest(prune bool) []byte {
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Run()
-	if cmd.ProcessState.ExitCode() != 0 {
-		Expect("failed to render manifest").To(BeNil())
-	}
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 	return buf.Bytes()
 }
 
@@ -172,9 +187,7 @@ func (g *genesis) AddSecrets() {
 	}
 	cmd := g.genesis(args...)
 	cmd.Run()
-	if cmd.ProcessState.ExitCode() != 0 {
-		Expect("failed to add secrets to vault").To(BeNil())
-	}
+	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 }
 
 func (g *genesis) base() string {
@@ -198,6 +211,7 @@ func (g *genesis) genesis(arg ...string) *exec.Cmd {
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("HOME=%s", g.workDir),
 		fmt.Sprintf("GENESIS_TESTING_BOSH_CPI=%s", g.environment.CPI),
+		"GENESIS_TESTING_CHECK_SECRETS_PRESENCE_ONLY=true",
 	)
 	return cmd
 }
