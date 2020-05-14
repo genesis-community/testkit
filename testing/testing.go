@@ -50,7 +50,10 @@ func Test(e Environment) {
 			g.Check()
 
 			manifestResult := g.Manifest()
-			manifest := b.Interpolate(manifestResult.raw, manifestResult.boshVariables)
+			createCredhubStubIffMissing(e.credhubStub(), b,
+				manifestResult, logger)
+			manifest := b.Interpolate(manifestResult.raw,
+				manifestResult.boshVariables, e.credhubStub())
 
 			createResultIfMissingForManifest(e.result(), manifest, logger)
 			result, err := ioutil.ReadFile(e.result())
@@ -83,14 +86,26 @@ func createResultIfMissingForManifest(result string, manifest []byte, logger *lo
 }
 
 func createVaultCacheIffMissing(vaultCache string, v *vault, g *genesis, logger *log.Logger) {
-	if vaultProvided := g.ProvidedSecretsStub(); len(vaultProvided) != 0 {
-		logger.Printf("detected provided secrets importing:\n%s", vaultProvided)
-		v.Import(bytes.NewBuffer(vaultProvided))
-	}
 	if _, err := os.Stat(vaultCache); os.IsNotExist(err) {
+		if vaultProvided := g.ProvidedSecretsStub(); string(vaultProvided) != "{}" {
+			logger.Printf("detected provided secrets importing:\n%s", vaultProvided)
+			v.Import(bytes.NewBuffer(vaultProvided))
+		}
+
 		logger.Printf("adding secrets to stub: %s", vaultCache)
 		g.AddSecrets()
 		createParentDirsAndWriteFile(vaultCache, v.Export(g.base()))
+	}
+}
+
+func createCredhubStubIffMissing(credhubStub string, b *bosh, m manifestResult, logger *log.Logger) {
+	if _, err := os.Stat(credhubStub); os.IsNotExist(err) {
+		logger.Printf("creating Credhub stub: %s", credhubStub)
+		if m.credhub {
+			createParentDirsAndWriteFile(credhubStub, b.GenerateCredhubStub(m.raw, m.boshVariables))
+		} else {
+			createParentDirsAndWriteFile(credhubStub, []byte(`{}`))
+		}
 	}
 }
 

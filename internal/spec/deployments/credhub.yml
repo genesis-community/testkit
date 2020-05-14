@@ -1,0 +1,11 @@
+kit:
+  name: dev
+  features:
+  - credhub
+
+genesis:
+  env: credhub
+
+params:
+  availability_zones: [z1]
+  users: []

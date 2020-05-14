@@ -35,4 +35,8 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "bosh-variables",
 		CloudConfig: "aws",
 	})
+	Test(Environment{
+		Name:        "credhub",
+		CloudConfig: "aws",
+	})
 })

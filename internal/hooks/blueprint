@@ -12,7 +12,7 @@ set -e
 
 declare -a merge
 
-validate_features openvpn bastion provided-user detect-cpi bosh-variables \
+validate_features openvpn bastion provided-user detect-cpi bosh-variables credhub \
                   proxy azure shield # defunct
 
 merge=( manifests/jumpbox.yml )
@@ -38,6 +38,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
   bosh-variables)
     merge+=( "manifests/addons/$want.yml" )
     ;;
+
+  credhub)
+      merge+=( "manifests/addons/$want.yml" )
+      ;;
 
   shield)
     echo >&2 "The Jumpbox Genesis Kit no longer supplies a 'shield' feature flag."

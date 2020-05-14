@@ -26,6 +26,7 @@ type genesis struct {
 type manifestResult struct {
 	raw           []byte
 	boshVariables []byte
+	credhub       bool
 }
 
 type kit struct {
@@ -116,14 +117,17 @@ func (g *genesis) Manifest() manifestResult {
 	raw := g.runManifest(true)
 	all := g.runManifest(false)
 
+	boshVariables, credhub := extractBoshVariables(all)
 	return manifestResult{
 		raw:           raw,
-		boshVariables: extractBoshVariables(all),
+		boshVariables: boshVariables,
+		credhub:       credhub,
 	}
 }
 
-func extractBoshVariables(raw []byte) []byte {
+func extractBoshVariables(raw []byte) ([]byte, bool) {
 	bv := struct {
+		Variables     []interface{}          `yaml:"variables",omitempty`
 		BoshVariables map[string]interface{} `yaml:"bosh-variables",omitempty`
 	}{}
 	err := yaml.Unmarshal(raw, &bv)
@@ -132,7 +136,7 @@ func extractBoshVariables(raw []byte) []byte {
 	bvo, err := yaml.Marshal(bv.BoshVariables)
 	Expect(err).ToNot(HaveOccurred())
 
-	return bvo
+	return bvo, bv.Variables != nil
 }
 
 func (g *genesis) runManifest(prune bool) []byte {

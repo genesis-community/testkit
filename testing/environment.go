@@ -29,6 +29,10 @@ func (e Environment) vaultCache() string {
 	return e.filePathForDir("vault", e.Name)
 }
 
+func (e Environment) credhubStub() string {
+	return e.filePathForDir("credhub", e.Name)
+}
+
 func (e Environment) result() string {
 	return e.filePathForDir("results", e.Name)
 }

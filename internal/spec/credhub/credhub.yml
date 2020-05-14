@@ -1,0 +1,16 @@
+ca_certificate:
+  ca: <!{credhub}:ca_certificate.ca!>
+  certificate: <!{credhub}:ca_certificate.certificate!>
+  private_key: <!{credhub}:ca_certificate.private_key!>
+certificate:
+  ca: <!{credhub}:certificate.ca!>
+  certificate: <!{credhub}:certificate.certificate!>
+  private_key: <!{credhub}:certificate.private_key!>
+password: <!{credhub}:password!>
+rsa:
+  private_key: <!{credhub}:rsa.private_key!>
+  public_key: <!{credhub}:rsa.public_key!>
+ssh:
+  private_key: <!{credhub}:ssh.private_key!>
+  public_key: <!{credhub}:ssh.public_key!>
+  public_key_fingerprint: <!{credhub}:ssh.public_key_fingerprint!>
