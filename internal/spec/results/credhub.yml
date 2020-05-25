@@ -61,4 +61,3 @@ update:
   max_in_flight: 4
   serial: false
   update_watch_time: 1000-60000
-variables: []

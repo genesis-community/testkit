@@ -52,7 +52,7 @@ func Test(e Environment) {
 			manifestResult := g.Manifest()
 			createCredhubStubIffMissing(e.credhubStub(), b,
 				manifestResult, logger)
-			manifest := b.Interpolate(manifestResult.raw,
+			manifest := b.Interpolate(manifestResult.manifest,
 				manifestResult.boshVariables, e.credhubStub())
 
 			createResultIfMissingForManifest(e.result(), manifest, logger)
@@ -102,7 +102,7 @@ func createCredhubStubIffMissing(credhubStub string, b *bosh, m manifestResult, 
 	if _, err := os.Stat(credhubStub); os.IsNotExist(err) {
 		logger.Printf("creating Credhub stub: %s", credhubStub)
 		if m.credhub {
-			createParentDirsAndWriteFile(credhubStub, b.GenerateCredhubStub(m.raw, m.boshVariables))
+			createParentDirsAndWriteFile(credhubStub, b.GenerateCredhubStub(m.manifest, m.boshVariables))
 		} else {
 			createParentDirsAndWriteFile(credhubStub, []byte(`{}`))
 		}

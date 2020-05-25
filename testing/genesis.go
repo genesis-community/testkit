@@ -17,6 +17,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	pruneKeys = []string{"meta", "pipeline", "params", "bosh-variables",
+		"kit", "genesis", "exodus", "compilation"}
+	pruneCreateEnvKeys = []string{"resource_pools", "vm_types",
+		"disk_pools", "disk_types", "networks", "azs", "vm_extensions"}
+)
+
 type genesis struct {
 	environment Environment
 	workDir     string
@@ -24,7 +31,7 @@ type genesis struct {
 }
 
 type manifestResult struct {
-	raw           []byte
+	manifest      []byte
 	boshVariables []byte
 	credhub       bool
 }
@@ -114,15 +121,34 @@ func (g *genesis) Check() {
 
 func (g *genesis) Manifest() manifestResult {
 	g.logger.Println(fmt.Sprintf("generating manifest for: %s", g.environment.Name))
-	raw := g.runManifest(true)
-	all := g.runManifest(false)
+	raw := g.rawManifest()
 
-	boshVariables, credhub := extractBoshVariables(all)
+	boshVariables, credhub := extractBoshVariables(raw)
 	return manifestResult{
-		raw:           raw,
+		manifest:      pruneManifest(raw, g.needsBoshCreatEnv()),
 		boshVariables: boshVariables,
 		credhub:       credhub,
 	}
+}
+
+func pruneManifest(raw []byte, needsBoshCreatEnv bool) []byte {
+	in := map[string]interface{}{}
+	err := yaml.Unmarshal(raw, &in)
+	Expect(err).ToNot(HaveOccurred())
+	allKeys := pruneKeys
+	if !needsBoshCreatEnv {
+		allKeys = append(allKeys, pruneCreateEnvKeys...)
+	}
+	fmt.Println(allKeys)
+	keys, err := json.Marshal(allKeys)
+	Expect(err).ToNot(HaveOccurred())
+	return jq{
+		query: `with_entries(
+                          select([.key] | inside($keys|fromjson) | not)
+                        )`,
+		variables: []string{"$keys"},
+		values:    []interface{}{string(keys)},
+	}.Run(in)
 }
 
 func extractBoshVariables(raw []byte) ([]byte, bool) {
@@ -139,14 +165,12 @@ func extractBoshVariables(raw []byte) ([]byte, bool) {
 	return bvo, bv.Variables != nil
 }
 
-func (g *genesis) runManifest(prune bool) []byte {
+func (g *genesis) rawManifest() []byte {
 	args := []string{
 		"manifest",
 		"--cwd", g.deploymentsDir(),
 		"--no-redact",
-	}
-	if !prune {
-		args = append(args, "--no-prune")
+		"--no-prune",
 	}
 	if g.environment.cloudConfigManifest() != "" {
 		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
@@ -158,6 +182,15 @@ func (g *genesis) runManifest(prune bool) []byte {
 	cmd.Run()
 	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
 	return buf.Bytes()
+}
+
+func (g *genesis) needsBoshCreatEnv() bool {
+	for _, f := range g.env().Kit.Features {
+		if f == "proto" {
+			return true
+		}
+	}
+	return false
 }
 
 func (g *genesis) ProvidedSecretsStub() []byte {
