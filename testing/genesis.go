@@ -139,7 +139,6 @@ func pruneManifest(raw []byte, needsBoshCreatEnv bool) []byte {
 	if !needsBoshCreatEnv {
 		allKeys = append(allKeys, pruneCreateEnvKeys...)
 	}
-	fmt.Println(allKeys)
 	keys, err := json.Marshal(allKeys)
 	Expect(err).ToNot(HaveOccurred())
 	return jq{
