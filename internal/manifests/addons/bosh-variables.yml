@@ -5,6 +5,10 @@ instance_groups:
       properties:
         jumpbox:
           hostname: ((hostname))
+          host:
+            name: ((host.name))
 
 bosh-variables:
   hostname: (( vault meta.vault "/host:name" ))
+  host:
+    name: (( vault meta.vault "/host:name" ))

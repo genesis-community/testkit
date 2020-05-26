@@ -8,6 +8,8 @@ instance_groups:
       jumpbox:
         env:
           TMPDIR: /var/vcap/data/root_tmp
+        host:
+          name: <!{meta.vault}/host:name!>
         hostname: <!{meta.vault}/host:name!>
         users:
         - name: test-user
