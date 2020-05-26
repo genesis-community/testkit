@@ -193,26 +193,36 @@ func (g *genesis) needsBoshCreatEnv() bool {
 }
 
 func (g *genesis) ProvidedSecretsStub() []byte {
-	rawFeatures, err := json.Marshal(g.env().Kit.Features)
-	Expect(err).ToNot(HaveOccurred())
+	args := []string{
+		"--no-color",
+		"check-secrets",
+		"-lm", "-v",
+		"--cwd", g.deploymentsDir(),
+		g.environment.Name,
+		"type=provided",
+	}
+	cmd := g.genesis(args...)
+	var buf bytes.Buffer
+	cmd.Stdout = &buf
+	cmd.Run()
+	if cmd.ProcessState.ExitCode() == 0 {
+		return []byte(`{}`)
+	}
 
 	return jq{
-		query: `with_entries(
-                          select([.key] | inside($features|fromjson))
-                        )
-                        | reduce .[] as $item ({}; . * $item)
-                        | with_entries(
-                          .key as $p
-                          | {
-                            key: "\($base)/\(.key)",
-                            value: .value.keys | with_entries(
-                              .value = "<!{meta.vault}/\($p):\(.key)!>"
-                            )
-                          }
-                        )`,
-		variables: []string{"$base", "$features"},
-		values:    []interface{}{g.base(), string(rawFeatures)},
-	}.Run(g.kit().Provided)
+		query: `split("\n") | map(select(startswith("  [")))
+			| map(split(" ")[3])
+			  | map(split(":") | {
+			    key: "\($base)/\(.[0])",
+			    value: ([{
+                              key: .[1],
+                              value: "<!{meta.vault}/\(.[0]):\(.[1])!>"
+                            }] | from_entries )
+                          })
+                        | [reduce .[] as $item ({}; . * $item)] | from_entries`,
+		variables: []string{"$base"},
+		values:    []interface{}{g.base()},
+	}.Run(buf.String())
 }
 
 func (g *genesis) AddSecrets() {
