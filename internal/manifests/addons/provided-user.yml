@@ -3,3 +3,6 @@ params:
     - name: (( vault meta.vault "/base:user" ))
       shell: /bin/bash
       password: (( vault meta.vault "/base:password" ))
+    - name: (( vault meta.vault "/not-base:user" ))
+      shell: /bin/bash
+      password: (( vault meta.vault "/not-base:password" ))

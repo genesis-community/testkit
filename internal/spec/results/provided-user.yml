@@ -13,6 +13,9 @@ instance_groups:
         - name: <!{meta.vault}/base:user!>
           password: <!{meta.vault}/base:password!>
           shell: /bin/bash
+        - name: <!{meta.vault}/not-base:user!>
+          password: <!{meta.vault}/not-base:password!>
+          shell: /bin/bash
     release: jumpbox
   - name: inventory
     release: jumpbox

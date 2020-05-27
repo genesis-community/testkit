@@ -45,6 +45,13 @@ provided:
           prompt:    Username for jumpbox user
         password:
           prompt:    Password for jumpbox user
+    not-base:
+      keys:
+        user:
+          sensitive: false
+          prompt:    Username for jumpbox user
+        password:
+          prompt:    Password for jumpbox user
 
   provided-key:
     base:

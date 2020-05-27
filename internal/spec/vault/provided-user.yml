@@ -3,3 +3,6 @@ secret/handshake:
 secret/provided/user/internal/base:
   password: <!{meta.vault}/base:password!>
   user: <!{meta.vault}/base:user!>
+secret/provided/user/internal/not-base:
+  password: <!{meta.vault}/not-base:password!>
+  user: <!{meta.vault}/not-base:user!>
