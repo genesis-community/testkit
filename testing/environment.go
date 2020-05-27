@@ -8,6 +8,7 @@ import (
 type Environment struct {
 	Name        string
 	CloudConfig string
+	Exodus      string
 	CPI         string
 	Focus       bool
 }
@@ -17,12 +18,11 @@ func (e Environment) manifest() string {
 }
 
 func (e Environment) cloudConfigManifest() string {
-	if e.CloudConfig == "" {
-		return ""
-	} else {
-		return filepath.Join(KitDir, "spec", "cloud_configs",
-			fmt.Sprintf("%s.yml", e.CloudConfig))
-	}
+	return e.filePathForDir("cloud_configs", e.CloudConfig)
+}
+
+func (e Environment) exodusStub() string {
+	return e.filePathForDir("exodus", e.Exodus)
 }
 
 func (e Environment) vaultCache() string {
@@ -38,6 +38,9 @@ func (e Environment) result() string {
 }
 
 func (e Environment) filePathForDir(dir string, name string) string {
+	if name == "" {
+		return ""
+	}
 	return filepath.Join(KitDir, "spec", dir,
 		fmt.Sprintf("%s.yml", name))
 }

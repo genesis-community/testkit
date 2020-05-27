@@ -1,0 +1,10 @@
+kit:
+  name: dev
+  features: []
+
+genesis:
+  env: test-exodus
+
+params:
+  availability_zones: [z1]
+  users: []

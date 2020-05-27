@@ -39,4 +39,9 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "credhub",
 		CloudConfig: "aws",
 	})
+	Test(Environment{
+		Name:        "test-exodus",
+		CloudConfig: "aws",
+		Exodus:      "old-version",
+	})
 })

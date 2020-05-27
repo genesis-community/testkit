@@ -1,5 +1,3 @@
-secret/handshake:
-  knock: <!secret/handshake:knock!>
 secret/openvpn/internal/openvpn/certs/ca:
   certificate: <!{meta.vault}/openvpn/certs/ca:certificate!>
   combined: <!{meta.vault}/openvpn/certs/ca:combined!>

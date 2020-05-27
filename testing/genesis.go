@@ -198,6 +198,22 @@ func (g *genesis) needsBoshCreatEnv() bool {
 	return false
 }
 
+func (g *genesis) ExodusStub() []byte {
+	if g.environment.exodusStub() == "" {
+		return []byte(`{}`)
+	}
+
+	in := map[string]interface{}{}
+	raw, err := ioutil.ReadFile(g.environment.exodusStub())
+	Expect(err).ToNot(HaveOccurred())
+	err = yaml.Unmarshal(raw, &in)
+	return jq{
+		query:     `[{ key: "\($base)", value: .}] | from_entries`,
+		variables: []string{"$base"},
+		values:    []interface{}{g.exodusBase()},
+	}.Run(in)
+}
+
 func (g *genesis) ProvidedSecretsStub() []byte {
 	args := []string{
 		"--no-color",
@@ -247,6 +263,11 @@ func (g *genesis) base() string {
 	return fmt.Sprintf("secret/%s/%s",
 		strings.Replace(g.environment.Name, "-", "/", -1),
 		filepath.Base(KitDir))
+}
+
+func (g *genesis) exodusBase() string {
+	return fmt.Sprintf("secret/exodus/%s/%s",
+		g.environment.Name, filepath.Base(KitDir))
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {

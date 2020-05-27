@@ -82,11 +82,13 @@ func (v *vault) Import(i io.Reader) {
 
 func (v *vault) Export(path string) []byte {
 	v.logger.Println("Exporting vault stub")
-	cmd := v.safe("export", "/")
+	cmd := v.safe("export", path)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Run()
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
+	if cmd.ProcessState.ExitCode() != 0 {
+		return []byte(`{}`)
+	}
 
 	return stubValues(buf.Bytes(), path)
 }

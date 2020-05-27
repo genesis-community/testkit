@@ -38,6 +38,8 @@ func Test(e Environment) {
 
 			b = newBosh(e, workDir, logger)
 
+			importExodus(v, g, logger)
+
 			createVaultCacheIffMissing(e.vaultCache(), v, g, logger)
 
 			cache, err := os.Open(e.vaultCache())
@@ -78,6 +80,13 @@ func context(focus bool, description string, what func()) {
 	}
 }
 
+func importExodus(v *vault, g *genesis, logger *log.Logger) {
+	if exodus := g.ExodusStub(); string(exodus) != "{}" {
+		logger.Printf("detected exodus stub importing:\n%s", exodus)
+		v.Import(bytes.NewBuffer(exodus))
+	}
+}
+
 func createResultIfMissingForManifest(result string, manifest []byte, logger *log.Logger) {
 	if _, err := os.Stat(result); os.IsNotExist(err) {
 		logger.Printf("creating new result file: %s", result)
@@ -99,11 +108,10 @@ func createVaultCacheIffMissing(vaultCache string, v *vault, g *genesis, logger 
 }
 
 func createCredhubStubIffMissing(credhubStub string, b *bosh, m manifestResult, logger *log.Logger) {
-	if _, err := os.Stat(credhubStub); os.IsNotExist(err) {
-		logger.Printf("creating Credhub stub: %s", credhubStub)
-		if m.credhub {
-			createParentDirsAndWriteFile(credhubStub, b.GenerateCredhubStub(m.manifest, m.boshVariables))
-		}
+	if _, err := os.Stat(credhubStub); os.IsNotExist(err) && m.credhub {
+		stub := b.GenerateCredhubStub(m.manifest, m.boshVariables)
+		logger.Printf("creating Credhub stub:\n%s", stub)
+		createParentDirsAndWriteFile(credhubStub, stub)
 	}
 }
 

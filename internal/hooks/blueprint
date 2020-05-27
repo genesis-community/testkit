@@ -8,6 +8,7 @@ if ! [[ "$genesis_version" =~ -dev$ ]] && ! new_enough "$genesis_version" "$min_
   describe >&2 "" "#R{[ERROR]} This kit needs Genesis $min_version.  Please upgrade before continuing" ""
   exit 1
 fi
+
 set -e
 
 declare -a merge
@@ -16,6 +17,13 @@ validate_features openvpn bastion provided-user detect-cpi bosh-variables credhu
                   proxy azure shield # defunct
 
 merge=( manifests/jumpbox.yml )
+
+set +e
+last_kit_version="$(exodus version)"
+if [[ "${last_kit_version}" != "" ]] && ! new_enough "${last_kit_version}" "2.0.0"; then
+    merge+=( "manifests/addons/upgrading.yml" )
+fi
+set -e
 
 for want in $GENESIS_REQUESTED_FEATURES; do
   case $want in
