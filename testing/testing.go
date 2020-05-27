@@ -103,8 +103,6 @@ func createCredhubStubIffMissing(credhubStub string, b *bosh, m manifestResult, 
 		logger.Printf("creating Credhub stub: %s", credhubStub)
 		if m.credhub {
 			createParentDirsAndWriteFile(credhubStub, b.GenerateCredhubStub(m.manifest, m.boshVariables))
-		} else {
-			createParentDirsAndWriteFile(credhubStub, []byte(`{}`))
 		}
 	}
 }

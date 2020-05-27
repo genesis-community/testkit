@@ -2,7 +2,6 @@ package testing
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -139,15 +138,22 @@ func pruneManifest(raw []byte, needsBoshCreatEnv bool) []byte {
 	if !needsBoshCreatEnv {
 		allKeys = append(allKeys, pruneCreateEnvKeys...)
 	}
-	keys, err := json.Marshal(allKeys)
+	filtered := map[string]interface{}{}
+	for k, v := range in {
+		found := false
+		for _, fk := range allKeys {
+			if fk == k {
+				found = true
+				break
+			}
+		}
+		if !found {
+			filtered[k] = v
+		}
+	}
+	out, err := yaml.Marshal(filtered)
 	Expect(err).ToNot(HaveOccurred())
-	return jq{
-		query: `with_entries(
-                          select([.key] | inside($keys|fromjson) | not)
-                        )`,
-		variables: []string{"$keys"},
-		values:    []interface{}{string(keys)},
-	}.Run(in)
+	return out
 }
 
 func extractBoshVariables(raw []byte) ([]byte, bool) {

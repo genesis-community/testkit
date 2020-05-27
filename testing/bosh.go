@@ -34,8 +34,15 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubStub string)
 	v := writeTmpFile(boshVars)
 	defer os.Remove(v)
 
-	cmd := b.bosh("int", m, "--vars-file", v, "--vars-file", credhubStub, "--var-errs")
+	args := []string{
+		"int", m, "--vars-file", v, "--var-errs", "--var-errs-unused",
+	}
 
+	if _, err := os.Stat(credhubStub); err == nil {
+		args = append(args, "--vars-file", credhubStub)
+	}
+
+	cmd := b.bosh(args...)
 	var buf bytes.Buffer
 	cmd.Stdout = &buf
 	cmd.Run()
@@ -45,6 +52,7 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubStub string)
 }
 
 func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte) []byte {
+	b.logger.Println(string(manifest))
 	m := writeTmpFile(manifest)
 	defer os.Remove(m)
 	v := writeTmpFile(boshVars)
