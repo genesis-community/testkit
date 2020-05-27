@@ -212,14 +212,15 @@ func (g *genesis) ProvidedSecretsStub() []byte {
 	return jq{
 		query: `split("\n") | map(select(startswith("  [")))
 			| map(split(" ")[3])
-			  | map(split(":") | {
-			    key: "\($base)/\(.[0])",
-			    value: ([{
-                              key: .[1],
-                              value: "<!{meta.vault}/\(.[0]):\(.[1])!>"
-                            }] | from_entries )
-                          })
-                        | [reduce .[] as $item ({}; . * $item)] | from_entries`,
+				| map(split(":") | {
+					key: "\($base)/\(.[0])",
+					value: ([{
+															key: .[1],
+															value: "<!{meta.vault}/\(.[0]):\(.[1])!>"
+														}] | from_entries )
+													})
+												| map([.] | from_entries)
+												| reduce .[] as $item ({}; . * $item)`,
 		variables: []string{"$base"},
 		values:    []interface{}{g.base()},
 	}.Run(buf.String())
