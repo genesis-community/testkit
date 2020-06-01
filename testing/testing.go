@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/egymgmbh/go-prefix-writer/prefixer"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -29,7 +30,11 @@ func Test(e Environment) {
 			workDir, err = ioutil.TempDir(os.TempDir(), "*-testkit-home")
 			Expect(err).ToNot(HaveOccurred())
 
-			logger = log.New(GinkgoWriter, fmt.Sprintf("deployment(%s) ", e.Name), 0)
+			prefix := fmt.Sprintf("[%s]", e.Name)
+			prefixWriter := prefixer.New(GinkgoWriter,
+				func() string { return prefix })
+
+			logger = log.New(prefixWriter, "[system] ", 0)
 
 			v = newVault(workDir, logger)
 			v.Start()

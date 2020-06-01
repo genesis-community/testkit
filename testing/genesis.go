@@ -1,7 +1,6 @@
 package testing
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -70,13 +69,12 @@ func (g *genesis) init() {
 	Expect(err).ToNot(HaveOccurred())
 
 	currentVault := GetCurrentVaultTarget(g.workDir)
-	err = g.genesis("init",
+	g.genesis("init",
 		"--link-dev-kit", KitDir,
 		"--vault", currentVault,
 		"--cwd", g.workDir,
 		"--directory", "deployments",
-	).Run()
-	Expect(err).ToNot(HaveOccurred())
+	).Run(nil)
 
 	g.logger.Println(fmt.Sprintf("copying environment file %s into workdir: %s",
 		g.environment.manifest(), g.deploymentsDir()))
@@ -115,9 +113,7 @@ func (g *genesis) Check() {
 		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
 	}
 	args = append(args, g.environment.Name)
-	cmd := g.genesis(args...)
-	cmd.Run()
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
+	g.genesis(args...).Run(g.environment.OutputMatchers.GenesisCheck)
 }
 
 func (g *genesis) Manifest() manifestResult {
@@ -192,12 +188,7 @@ func (g *genesis) rawManifest() []byte {
 		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
 	}
 	args = append(args, g.environment.Name)
-	cmd := g.genesis(args...)
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Run()
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
-	return buf.Bytes()
+	return g.genesis(args...).Run(g.environment.OutputMatchers.GenesisManifest)
 }
 
 func (g *genesis) needsBoshCreatEnv() bool {
@@ -227,18 +218,15 @@ func (g *genesis) ExodusStub() []byte {
 
 func (g *genesis) ProvidedSecretsStub() []byte {
 	args := []string{
-		"--no-color",
 		"check-secrets",
+		"--no-color",
 		"-lm", "-v",
 		"--cwd", g.deploymentsDir(),
 		g.environment.Name,
 		"type=provided",
 	}
-	cmd := g.genesis(args...)
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Run()
-	if cmd.ProcessState.ExitCode() == 0 {
+	buf, code := g.genesis(args...).RunWithoutMatcher()
+	if code == 0 {
 		return []byte(`{}`)
 	}
 
@@ -256,7 +244,7 @@ func (g *genesis) ProvidedSecretsStub() []byte {
 			| reduce .[] as $item ({}; . * $item)`,
 		variables: []string{"$base"},
 		values:    []interface{}{g.base()},
-	}.Run(buf.String())
+	}.Run(string(buf))
 }
 
 func (g *genesis) AddSecrets() {
@@ -265,9 +253,7 @@ func (g *genesis) AddSecrets() {
 		"--cwd", g.deploymentsDir(),
 		g.environment.Name,
 	}
-	cmd := g.genesis(args...)
-	cmd.Run()
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
+	g.genesis(args...).Run(g.environment.OutputMatchers.GenesisAddSecrets)
 }
 
 func (g *genesis) base() string {
@@ -289,16 +275,12 @@ func (g *genesis) git(arg ...string) *exec.Cmd {
 	return cmd
 }
 
-func (g *genesis) genesis(arg ...string) *exec.Cmd {
-	cmd := exec.Command("genesis", arg...)
-	cmd.Stdout = g.logger.Writer()
-	cmd.Stderr = g.logger.Writer()
-	cmd.Env = append(os.Environ(),
-		fmt.Sprintf("HOME=%s", g.workDir),
+func (g *genesis) genesis(arg ...string) *Cmd {
+	return NewCmd("genesis", arg, []string{
 		fmt.Sprintf("GENESIS_TESTING_BOSH_CPI=%s", g.environment.CPI),
 		"GENESIS_TESTING_CHECK_SECRETS_PRESENCE_ONLY=true",
-	)
-	return cmd
+		fmt.Sprintf("HOME=%s", g.workDir),
+	}, g.logger)
 }
 
 func copyFile(src string, dst string) {

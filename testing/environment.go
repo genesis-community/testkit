@@ -3,14 +3,23 @@ package testing
 import (
 	"fmt"
 	"path/filepath"
+
+	gtypes "github.com/onsi/gomega/types"
 )
 
 type Environment struct {
-	Name        string
-	CloudConfig string
-	Exodus      string
-	CPI         string
-	Focus       bool
+	Name           string
+	CloudConfig    string
+	Exodus         string
+	CPI            string
+	Focus          bool
+	OutputMatchers OutputMatchers
+}
+
+type OutputMatchers struct {
+	GenesisAddSecrets gtypes.GomegaMatcher
+	GenesisCheck      gtypes.GomegaMatcher
+	GenesisManifest   gtypes.GomegaMatcher
 }
 
 func (e Environment) manifest() string {

@@ -6,6 +6,7 @@ import (
 
 	. "github.com/genesis-community/testkit/testing"
 	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Interal Kit", func() {
@@ -43,5 +44,14 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "test-exodus",
 		CloudConfig: "aws",
 		Exodus:      "old-version",
+	})
+	Test(Environment{
+		Name:        "blueprint-error",
+		CloudConfig: "aws",
+		OutputMatchers: OutputMatchers{
+			GenesisAddSecrets: ContainSubstring("'blueprint' hook exited 1"),
+			GenesisCheck:      ContainSubstring("'blueprint' hook exited 1"),
+			GenesisManifest:   ContainSubstring("'blueprint' hook exited 1"),
+		},
 	})
 })

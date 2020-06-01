@@ -15,6 +15,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
+	"github.com/egymgmbh/go-prefix-writer/prefixer"
 	"github.com/onsi/ginkgo/config"
 	. "github.com/onsi/gomega"
 )
@@ -98,9 +99,13 @@ func (v *vault) Stop() {
 }
 
 func (v *vault) safe(arg ...string) *exec.Cmd {
+	prefix := fmt.Sprintf("[vault-%s] ", arg[0])
+	prefixWriter := prefixer.New(v.logger.Writer(),
+		func() string { return prefix })
+
 	cmd := exec.Command("safe", arg...)
-	cmd.Stdout = v.logger.Writer()
-	cmd.Stderr = v.logger.Writer()
+	cmd.Stdout = prefixWriter
+	cmd.Stderr = prefixWriter
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 	cmd.Env = append(os.Environ(),
 		fmt.Sprintf("HOME=%s", v.homeDir),

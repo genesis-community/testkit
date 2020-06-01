@@ -8,6 +8,7 @@ require (
 	github.com/cloudfoundry/bosh-cli v6.2.1+incompatible
 	github.com/cloudfoundry/bosh-utils v0.0.0-20200429181937-96357f638e8c // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
+	github.com/egymgmbh/go-prefix-writer v0.0.0-20180609083313-7326ea162eca
 	github.com/gofrs/flock v0.7.1
 	github.com/gonvenience/ytbx v1.2.2
 	github.com/google/goexpect v0.0.0-20191001010744-5b6988669ffa
