@@ -18,9 +18,11 @@ import (
 
 var (
 	pruneKeys = []string{"meta", "pipeline", "params", "bosh-variables",
-		"kit", "genesis", "exodus", "compilation"}
+		"kit", "genesis", "compilation"}
 	pruneCreateEnvKeys = []string{"resource_pools", "vm_types",
 		"disk_pools", "disk_types", "networks", "azs", "vm_extensions"}
+	pruneExodusKeys = []string{"version", "dated", "deployer", "kit_name",
+		"kit_version", "vault_base"}
 )
 
 type genesis struct {
@@ -140,14 +142,23 @@ func pruneManifest(raw []byte, needsBoshCreatEnv bool) []byte {
 	}
 	filtered := map[string]interface{}{}
 	for k, v := range in {
-		found := false
-		for _, fk := range allKeys {
-			if fk == k {
-				found = true
-				break
+		if k == "exodus" {
+			e, ok := v.(map[string]interface{})
+			if !ok {
+				continue
 			}
+			exodus := map[string]interface{}{}
+			for ek, ev := range e {
+				if !contains(pruneExodusKeys, ek) {
+					exodus[ek] = ev
+				}
+			}
+			if len(exodus) != 0 {
+				filtered[k] = exodus
+			}
+			continue
 		}
-		if !found {
+		if !contains(allKeys, k) {
 			filtered[k] = v
 		}
 	}
@@ -295,4 +306,13 @@ func copyFile(src string, dst string) {
 	Expect(err).ToNot(HaveOccurred())
 	err = ioutil.WriteFile(dst, data, 0644)
 	Expect(err).ToNot(HaveOccurred())
+}
+
+func contains(in []string, key string) bool {
+	for _, fk := range in {
+		if fk == key {
+			return true
+		}
+	}
+	return false
 }

@@ -13,7 +13,8 @@ set -e
 
 declare -a merge
 
-validate_features openvpn bastion provided-user detect-cpi bosh-variables credhub \
+validate_features openvpn bastion provided-user detect-cpi bosh-variables \
+                  exodus credhub \
                   proxy azure shield # defunct
 
 merge=( manifests/jumpbox.yml )
@@ -48,6 +49,10 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     ;;
 
   credhub)
+      merge+=( "manifests/addons/$want.yml" )
+      ;;
+
+  exodus)
       merge+=( "manifests/addons/$want.yml" )
       ;;
 

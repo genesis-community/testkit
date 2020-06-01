@@ -1,6 +1,7 @@
 kit:
   name: dev
-  features: []
+  features:
+  - exodus
 
 genesis:
   env: test-exodus
