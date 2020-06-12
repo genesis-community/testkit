@@ -19,6 +19,7 @@ type Cmd struct {
 	stderr   *bytes.Buffer
 	stdout   *bytes.Buffer
 	combined *bytes.Buffer
+	prefixer *prefixer.Prefixer
 	writer   *io.Writer
 	command  string
 	cmd      *exec.Cmd
@@ -45,6 +46,7 @@ func NewCmd(c string, arg []string, env []string, logger *log.Logger) *Cmd {
 		command: command, cmd: cmd,
 		stdout: outBuff, stderr: errBuff,
 		combined: combinedBuff,
+		prefixer: prefixWriter,
 	}
 }
 
@@ -54,6 +56,7 @@ func (c *Cmd) Run(matcher gtypes.GomegaMatcher) []byte {
 	}
 	fmt.Fprintf(c.combined, "running: %+v\n", c.cmd)
 	err := c.cmd.Run()
+	c.prefixer.EnsureNewline()
 	code := c.cmd.ProcessState.ExitCode()
 	fmt.Fprintf(c.combined, commandFooter(c.command, code))
 	if err != nil {

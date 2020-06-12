@@ -1,12 +1,10 @@
 package testing
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 
 	. "github.com/onsi/gomega"
 	"gopkg.in/yaml.v3"
@@ -42,13 +40,7 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubStub string)
 		args = append(args, "--vars-file", credhubStub)
 	}
 
-	cmd := b.bosh(args...)
-	var buf bytes.Buffer
-	cmd.Stdout = &buf
-	cmd.Run()
-
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
-	return buf.Bytes()
+	return b.bosh(args...).Run(nil)
 }
 
 func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte) []byte {
@@ -60,23 +52,17 @@ func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte) []byte {
 	cs := writeTmpFile([]byte("{}"))
 	defer os.Remove(cs)
 
-	cmd := b.bosh("int", m, "--vars-file", v, "--vars-store", cs, "--var-errs")
-	cmd.Run()
-	Expect(cmd.ProcessState.ExitCode()).To(Equal(0))
+	b.bosh("int", m, "--vars-file", v, "--vars-store", cs, "--var-errs").Run(nil)
 
 	creds, err := ioutil.ReadFile(cs)
 	Expect(err).ToNot(HaveOccurred())
 	return stubCredhubValues(creds)
 }
 
-func (b *bosh) bosh(arg ...string) *exec.Cmd {
-	cmd := exec.Command("bosh", arg...)
-	cmd.Stdout = b.logger.Writer()
-	cmd.Stderr = b.logger.Writer()
-	cmd.Env = append(os.Environ(),
+func (b *bosh) bosh(arg ...string) *Cmd {
+	return NewCmd("bosh", arg, []string{
 		fmt.Sprintf("HOME=%s", b.workDir),
-	)
-	return cmd
+	}, b.logger)
 }
 
 func writeTmpFile(data []byte) string {
