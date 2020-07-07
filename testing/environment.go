@@ -32,7 +32,7 @@ func (e Environment) cloudConfigManifest() string {
 }
 
 func (e Environment) runtimeConfigManifest() string {
-	return e.filePathForDir("runtime_configs", e.CloudConfig)
+	return e.filePathForDir("runtime_configs", e.RuntimeConfig)
 }
 
 func (e Environment) exodusStub() string {
