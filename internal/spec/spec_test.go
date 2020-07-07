@@ -16,6 +16,11 @@ var _ = Describe("Interal Kit", func() {
 	})
 
 	Test(Environment{
+		Name:          "baseline",
+		CloudConfig:   "aws",
+		RuntimeConfig: "dns",
+	})
+	Test(Environment{
 		Name:        "baseline",
 		CloudConfig: "aws",
 	})
@@ -49,9 +54,9 @@ var _ = Describe("Interal Kit", func() {
 		Name:        "blueprint-error",
 		CloudConfig: "aws",
 		OutputMatchers: OutputMatchers{
-			GenesisAddSecrets: ContainSubstring("'blueprint' hook exited 1"),
-			GenesisCheck:      ContainSubstring("'blueprint' hook exited 1"),
-			GenesisManifest:   ContainSubstring("'blueprint' hook exited 1"),
+			GenesisAddSecrets: ContainSubstring("this-does-not-exist"),
+			GenesisCheck:      ContainSubstring("this-does-not-exist"),
+			GenesisManifest:   ContainSubstring("this-does-not-exist"),
 		},
 	})
 })

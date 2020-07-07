@@ -110,7 +110,10 @@ func (g *genesis) Check() {
 		"--no-stemcells",
 	}
 	if g.environment.cloudConfigManifest() != "" {
-		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
+		args = append(args, "-c", fmt.Sprintf("cloud=%s", g.environment.cloudConfigManifest()))
+	}
+	if g.environment.runtimeConfigManifest() != "" {
+		args = append(args, "-c", fmt.Sprintf("runtime=%s", g.environment.runtimeConfigManifest()))
 	}
 	args = append(args, g.environment.Name)
 	g.genesis(args...).Run(g.environment.OutputMatchers.GenesisCheck)
@@ -186,6 +189,9 @@ func (g *genesis) rawManifest() []byte {
 	}
 	if g.environment.cloudConfigManifest() != "" {
 		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
+	}
+	if g.environment.runtimeConfigManifest() != "" {
+		args = append(args, "--runtime-config", g.environment.runtimeConfigManifest())
 	}
 	args = append(args, g.environment.Name)
 	return g.genesis(args...).Run(g.environment.OutputMatchers.GenesisManifest)

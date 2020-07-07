@@ -10,6 +10,7 @@ import (
 type Environment struct {
 	Name           string
 	CloudConfig    string
+	RuntimeConfig  string
 	Exodus         string
 	CPI            string
 	Focus          bool
@@ -28,6 +29,10 @@ func (e Environment) manifest() string {
 
 func (e Environment) cloudConfigManifest() string {
 	return e.filePathForDir("cloud_configs", e.CloudConfig)
+}
+
+func (e Environment) runtimeConfigManifest() string {
+	return e.filePathForDir("runtime_configs", e.CloudConfig)
 }
 
 func (e Environment) exodusStub() string {
