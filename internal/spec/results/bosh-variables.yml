@@ -29,7 +29,7 @@ instance_groups:
   persistent_disk_type: jumpbox
   stemcell: default
   vm_type: jumpbox
-name: bosh-variables-internal
+name: bosh-variables-internal-test
 releases:
 - name: jumpbox
   sha1: 0f8a76ea4bc731e0c397da0773aa87475ce9f1b2

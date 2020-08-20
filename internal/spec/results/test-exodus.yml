@@ -27,7 +27,7 @@ instance_groups:
   persistent_disk_type: jumpbox
   stemcell: default
   vm_type: jumpbox
-name: test-exodus-internal
+name: test-exodus-internal-test
 properties:
   upgrading: true
 releases:

@@ -1,5 +1,5 @@
 ---
-name:     internal
+name:     internal-test
 version:  1.0.10
 authors:  [ James Hunt <jhunt@starkandwayne.com>,
             Dennis Bell <dbell@starkandwayne.com> ]

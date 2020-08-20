@@ -21,7 +21,7 @@ var (
 	pruneCreateEnvKeys = []string{"resource_pools", "vm_types",
 		"disk_pools", "disk_types", "networks", "azs", "vm_extensions"}
 	pruneExodusKeys = []string{"version", "dated", "deployer", "kit_name",
-		"kit_version", "vault_base", "kit_is_dev", "features"}
+		"kit_version", "vault_base", "kit_is_dev", "features", "upgarding"}
 )
 
 type genesis struct {
@@ -257,12 +257,12 @@ func (g *genesis) AddSecrets() {
 func (g *genesis) base() string {
 	return fmt.Sprintf("secret/%s/%s",
 		strings.Replace(g.environment.Name, "-", "/", -1),
-		filepath.Base(KitDir))
+		g.kit().Name)
 }
 
 func (g *genesis) exodusBase() string {
 	return fmt.Sprintf("secret/exodus/%s/%s",
-		g.environment.Name, filepath.Base(KitDir))
+		g.environment.Name, g.kit().Name)
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {

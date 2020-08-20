@@ -1,2 +1,2 @@
-secret/bosh/variables/internal/host:
+secret/bosh/variables/internal-test/host:
   name: <!{meta.vault}/host:name!>
