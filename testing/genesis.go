@@ -21,7 +21,7 @@ var (
 	pruneCreateEnvKeys = []string{"resource_pools", "vm_types",
 		"disk_pools", "disk_types", "networks", "azs", "vm_extensions"}
 	pruneExodusKeys = []string{"version", "dated", "deployer", "kit_name",
-		"kit_version", "vault_base"}
+		"kit_version", "vault_base", "kit_is_dev", "features"}
 )
 
 type genesis struct {
@@ -37,6 +37,7 @@ type manifestResult struct {
 }
 
 type kit struct {
+	Name     string                 `yaml:"name"`
 	Provided map[string]interface{} `yaml:"provided"`
 }
 
@@ -74,6 +75,7 @@ func (g *genesis) init() {
 		"--vault", currentVault,
 		"--cwd", g.workDir,
 		"--directory", "deployments",
+		g.kit().Name,
 	).Run(nil)
 
 	g.logger.Println(fmt.Sprintf("copying environment file %s into workdir: %s",
@@ -109,12 +111,7 @@ func (g *genesis) Check() {
 		"--no-manifest",
 		"--no-stemcells",
 	}
-	if g.environment.cloudConfigManifest() != "" {
-		args = append(args, "-c", fmt.Sprintf("cloud=%s", g.environment.cloudConfigManifest()))
-	}
-	if g.environment.runtimeConfigManifest() != "" {
-		args = append(args, "-c", fmt.Sprintf("runtime=%s", g.environment.runtimeConfigManifest()))
-	}
+	args = append(args, g.configsArgs()...)
 	args = append(args, g.environment.Name)
 	g.genesis(args...).Run(g.environment.OutputMatchers.GenesisCheck)
 }
@@ -187,12 +184,7 @@ func (g *genesis) rawManifest() []byte {
 		"--no-redact",
 		"--no-prune",
 	}
-	if g.environment.cloudConfigManifest() != "" {
-		args = append(args, "--cloud-config", g.environment.cloudConfigManifest())
-	}
-	if g.environment.runtimeConfigManifest() != "" {
-		args = append(args, "--runtime-config", g.environment.runtimeConfigManifest())
-	}
+	args = append(args, g.configsArgs()...)
 	args = append(args, g.environment.Name)
 	return g.genesis(args...).Run(g.environment.OutputMatchers.GenesisManifest)
 }
@@ -281,10 +273,37 @@ func (g *genesis) git(arg ...string) *exec.Cmd {
 	return cmd
 }
 
+func (g *genesis) configsArgs() []string {
+	args := make([]string, 0)
+	if g.environment.cloudConfigManifest() != "" {
+		args = append(args, "-c", fmt.Sprintf("cloud=%s", g.environment.cloudConfigManifest()))
+	} else {
+		args = append(args, "-c", fmt.Sprintf("cloud=%s", g.configStubPath()))
+	}
+	if g.environment.runtimeConfigManifest() != "" {
+		args = append(args, "-c", fmt.Sprintf("runtime=%s", g.environment.runtimeConfigManifest()))
+	} else {
+		args = append(args, "-c", fmt.Sprintf("runtime=%s", g.configStubPath()))
+	}
+	return args
+}
+
+func (g *genesis) configStubPath() string {
+	dst := filepath.Join(g.workDir, "config-stub.yml")
+	_, err := os.Stat(dst)
+	if os.IsNotExist(err) {
+		err := ioutil.WriteFile(dst, []byte(`{}`), 0644)
+		Expect(err).ToNot(HaveOccurred())
+	}
+	return dst
+}
+
 func (g *genesis) genesis(arg ...string) *Cmd {
 	return NewCmd("genesis", arg, []string{
 		fmt.Sprintf("GENESIS_TESTING_BOSH_CPI=%s", g.environment.CPI),
 		"GENESIS_TESTING_CHECK_SECRETS_PRESENCE_ONLY=true",
+		"GENESIS_TESTING=yes",
+		fmt.Sprintf("GENESIS_BOSH_VERIFIED=%s", g.environment.Name),
 		fmt.Sprintf("HOME=%s", g.workDir),
 	}, g.logger)
 }
