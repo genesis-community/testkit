@@ -1,3 +1,5 @@
+exodus:
+  features: credhub
 instance_groups:
 - azs:
   - z1

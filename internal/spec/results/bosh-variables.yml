@@ -1,3 +1,5 @@
+exodus:
+  features: bosh-variables
 instance_groups:
 - azs:
   - z1

@@ -21,7 +21,7 @@ var (
 	pruneCreateEnvKeys = []string{"resource_pools", "vm_types",
 		"disk_pools", "disk_types", "networks", "azs", "vm_extensions"}
 	pruneExodusKeys = []string{"version", "dated", "deployer", "kit_name",
-		"kit_version", "vault_base", "kit_is_dev", "features", "upgarding"}
+		"kit_version", "vault_base", "kit_is_dev", "upgarding"}
 )
 
 type genesis struct {
