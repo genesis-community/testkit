@@ -208,7 +208,12 @@ func (g *genesis) ExodusStub() []byte {
 	Expect(err).ToNot(HaveOccurred())
 	err = yaml.Unmarshal(raw, &in)
 	return jq{
-		query:     `[{ key: "\($base)", value: .}] | from_entries`,
+		query: `to_entries | map(
+                          if (.value | type == "string") then
+                            {key: "\($base)", value: [.] | from_entries }
+                          else
+                            {key: "\($base)/\(.key)", value: .value}
+                        end) | from_entries`,
 		variables: []string{"$base"},
 		values:    []interface{}{g.exodusBase()},
 	}.Run(in)
