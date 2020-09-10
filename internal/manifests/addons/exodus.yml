@@ -1,4 +1,13 @@
+meta:
+  bosh_exodus_path: (( grab params.bosh_exodus_path || params.bosh || params.env ))
+  bosh_uaa_clients: (( vault "secret/exodus/" meta.bosh_exodus_path "/bosh:vault_base" ))
+
 exodus:
   not_filtered: this property should end up in result
   bosh:
     ca: cert
+
+instance_groups:
+- properties:
+    prometheus:
+      client_secret: (( vault meta.bosh_uaa_clients "/uaa/clients/prometheus:secret" ))

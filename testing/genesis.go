@@ -212,7 +212,11 @@ func (g *genesis) ExodusStub() []byte {
                           if (.value | type == "string") then
                             {key: "\($base)", value: [.] | from_entries }
                           else
-                            {key: "\($base)/\(.key)", value: .value}
+                            if (.key | contains("/")) then
+                              {key: .key, value: .value}
+                            else
+                              {key: "\($base)/\(.key)", value: .value}
+                            end
                         end) | from_entries`,
 		variables: []string{"$base"},
 		values:    []interface{}{g.exodusBase()},

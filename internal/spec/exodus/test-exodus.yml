@@ -1,0 +1,8 @@
+version: 1.2.1
+bosh:
+  ca: foobar
+
+secret/exodus/test-bosh/bosh:
+  vault_base: secret/base/bosh
+secret/base/bosh/uaa/clients/prometheus:
+  secret: barfoo

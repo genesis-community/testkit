@@ -9,3 +9,4 @@ genesis:
 params:
   availability_zones: [z1]
   users: []
+  bosh_exodus_path: test-bosh

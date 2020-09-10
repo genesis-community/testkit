@@ -28,6 +28,9 @@ instance_groups:
     static_ips:
     - 172.31.0.16
   persistent_disk_type: jumpbox
+  properties:
+    prometheus:
+      client_secret: barfoo
   stemcell: default
   vm_type: jumpbox
 name: test-exodus-internal-test

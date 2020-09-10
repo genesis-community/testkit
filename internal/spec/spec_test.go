@@ -46,9 +46,10 @@ var _ = Describe("Interal Kit", func() {
 		CloudConfig: "aws",
 	})
 	Test(Environment{
+		Focus:       true,
 		Name:        "test-exodus",
 		CloudConfig: "aws",
-		Exodus:      "old-version",
+		Exodus:      "test-exodus",
 	})
 	Test(Environment{
 		Name:        "blueprint-error",
