@@ -13,6 +13,7 @@ type Environment struct {
 	RuntimeConfig  string
 	Exodus         string
 	CPI            string
+	Ops            []string
 	Focus          bool
 	OutputMatchers OutputMatchers
 }
@@ -49,6 +50,14 @@ func (e Environment) credhubStub() string {
 
 func (e Environment) result() string {
 	return e.filePathForDir("results", e.Name)
+}
+
+func (e Environment) opsFiles() []string {
+	out := make([]string, 0)
+	for _, f := range e.Ops {
+		out = append(out, e.filePathForDir("ops", f))
+	}
+	return out
 }
 
 func (e Environment) filePathForDir(dir string, name string) string {

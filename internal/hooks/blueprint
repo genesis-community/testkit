@@ -15,7 +15,7 @@ declare -a merge
 
 validate_features openvpn bastion provided-user detect-cpi bosh-variables \
                   exodus credhub \
-                  proxy azure shield # defunct
+                  proxy azure shield test-ops-override
 
 merge=( manifests/jumpbox.yml )
 
@@ -74,6 +74,16 @@ for want in $GENESIS_REQUESTED_FEATURES; do
     echo >&2 "You no longer need to explicitly specify the 'proxy' feature."
     echo >&2 "If you remove it, everything will still work as expected."
     ;;
+
+  *)
+  if [[ -f "$GENESIS_ROOT/ops/$want.yml" ]] ; then
+    merge+=( "$GENESIS_ROOT/ops/$want.yml" )
+  else
+    abort=1
+    describe >&2 \
+      "#R{[ERROR]} The #c{$want} feature is invalid. See the manual for list of valid features."
+  fi
+  ;;
   esac
 done
 

@@ -25,6 +25,13 @@ var _ = Describe("Interal Kit", func() {
 		CloudConfig: "aws",
 	})
 	Test(Environment{
+		Name:        "ops-override",
+		CloudConfig: "aws",
+		Ops: []string{
+			"test-ops-override",
+		},
+	})
+	Test(Environment{
 		Name:        "openvpn",
 		CloudConfig: "aws",
 	})
@@ -46,7 +53,6 @@ var _ = Describe("Interal Kit", func() {
 		CloudConfig: "aws",
 	})
 	Test(Environment{
-		Focus:       true,
 		Name:        "test-exodus",
 		CloudConfig: "aws",
 		Exodus:      "test-exodus",

@@ -1,0 +1,53 @@
+exodus:
+  features: test-ops-override
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: jumpbox
+    properties:
+      jumpbox:
+        env:
+          TMPDIR: /var/vcap/data/root_tmp
+        hostname: ops-override-jumpbox
+        users:
+        - name: test-user
+          shell: /bin/bash
+    release: jumpbox
+  - name: inventory
+    release: jumpbox
+  - name: toolbelt
+    release: toolbelt
+  - name: toolbelt-quick
+    release: toolbelt
+  name: jumpbox
+  networks:
+  - name: jumpbox
+    static_ips:
+    - 172.31.0.16
+  persistent_disk_type: jumpbox
+  stemcell: default
+  vm_type: jumpbox
+name: ops-override-internal-test
+properties:
+  from_ops_file: test
+releases:
+- name: jumpbox
+  sha1: 0f8a76ea4bc731e0c397da0773aa87475ce9f1b2
+  url: https://github.com/cloudfoundry-community/jumpbox-boshrelease/releases/download/v4.7.5/jumpbox-4.7.5.tgz
+  version: 4.7.5
+- name: toolbelt
+  sha1: 08b493f205680323a005ab202e0add186137cec6
+  url: https://github.com/cloudfoundry-community/toolbelt-boshrelease/releases/download/v3.5.0/toolbelt-3.5.0.tgz
+  version: 3.5.0
+stemcells:
+- alias: default
+  os: ubuntu-xenial
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 1000-60000
+  max_in_flight: 4
+  serial: false
+  update_watch_time: 1000-60000

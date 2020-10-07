@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -83,6 +84,9 @@ func (g *genesis) init() {
 	env := fmt.Sprintf("%s.yml", g.environment.Name)
 	envFile := filepath.Join(g.deploymentsDir(), env)
 	copyFile(g.environment.manifest(), envFile)
+	for _, f := range g.environment.opsFiles() {
+		copyFile(f, filepath.Join(g.deploymentsDir(), "ops", path.Base(f)))
+	}
 }
 
 func (g *genesis) kit() kit {
@@ -318,6 +322,10 @@ func (g *genesis) genesis(arg ...string) *Cmd {
 }
 
 func copyFile(src string, dst string) {
+	dir := path.Dir(dst)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, os.ModePerm)
+	}
 	data, err := ioutil.ReadFile(src)
 	Expect(err).ToNot(HaveOccurred())
 	err = ioutil.WriteFile(dst, data, 0644)
