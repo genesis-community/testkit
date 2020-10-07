@@ -25,10 +25,11 @@ func Test(e Environment) {
 			logger  *log.Logger
 		)
 
-		BeforeEach(func() {
+		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
 			var err error
 			workDir, err = ioutil.TempDir(os.TempDir(), "*-testkit-home")
 			Expect(err).ToNot(HaveOccurred())
+			defer os.RemoveAll(workDir)
 
 			prefix := fmt.Sprintf("[%s]", e.Name)
 			prefixWriter := prefixer.New(GinkgoWriter,
@@ -37,6 +38,7 @@ func Test(e Environment) {
 			logger = log.New(prefixWriter, "[system] ", 0)
 
 			v = newVault(workDir, logger)
+			defer v.Stop()
 			v.Start()
 
 			g = newGenesis(e, workDir, logger)
@@ -51,9 +53,7 @@ func Test(e Environment) {
 			Expect(err).ToNot(HaveOccurred())
 			defer cache.Close()
 			v.Import(cache)
-		})
 
-		It(fmt.Sprintf("renders a manifest which matches: %s", e.result()), func() {
 			g.Check()
 
 			manifestResult := g.Manifest()
@@ -67,12 +67,7 @@ func Test(e Environment) {
 			Expect(err).ToNot(HaveOccurred())
 
 			Expect(manifest).To(dyff.MatchYAML(result))
-		})
 
-		AfterEach(func() {
-			v.Stop()
-			err := os.RemoveAll(workDir)
-			Expect(err).ToNot(HaveOccurred())
 		})
 	})
 }
