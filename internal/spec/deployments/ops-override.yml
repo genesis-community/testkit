@@ -1,0 +1,14 @@
+kit:
+  name: dev
+  features:
+    - test-ops-override
+
+genesis:
+  env:      ops-override
+
+params:
+  availability_zones: [z1]
+
+  users:
+  - name: test-user
+    shell: /bin/bash
