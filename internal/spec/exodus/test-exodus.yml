@@ -1,4 +1,6 @@
-version: 1.2.1
+internal-test:
+  version: 1.2.1
+
 bosh:
   ca: foobar
 

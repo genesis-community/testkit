@@ -274,8 +274,7 @@ func (g *genesis) base() string {
 }
 
 func (g *genesis) exodusBase() string {
-	return fmt.Sprintf("secret/exodus/%s/%s",
-		g.environment.Name, g.kit().Name)
+	return fmt.Sprintf("secret/exodus/%s", g.environment.Name)
 }
 
 func (g *genesis) git(arg ...string) *exec.Cmd {
