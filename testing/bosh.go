@@ -26,7 +26,7 @@ func newBosh(environment Environment, workDir string, logger *log.Logger) *bosh 
 	return &b
 }
 
-func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubStub string) []byte {
+func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubVars string, credhubStub string) []byte {
 	m := writeTmpFile(manifest)
 	defer os.Remove(m)
 	v := writeTmpFile(boshVars)
@@ -34,6 +34,10 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubStub string)
 
 	args := []string{
 		"int", m, "--vars-file", v, "--var-errs", "--var-errs-unused",
+	}
+
+	if _, err := os.Stat(credhubVars); err == nil {
+		args = append(args, "--vars-file", credhubVars)
 	}
 
 	if _, err := os.Stat(credhubStub); err == nil {

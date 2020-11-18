@@ -58,6 +58,12 @@ var _ = Describe("Interal Kit", func() {
 		Exodus:      "test-exodus",
 	})
 	Test(Environment{
+		Name:        "credhub-vars",
+		CloudConfig: "aws",
+		CredhubVars: "secret",
+		Focus:       true,
+	})
+	Test(Environment{
 		Name:        "blueprint-error",
 		CloudConfig: "aws",
 		OutputMatchers: OutputMatchers{

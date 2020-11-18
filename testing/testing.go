@@ -60,7 +60,7 @@ func Test(e Environment) {
 			createCredhubStubIffMissing(e.credhubStub(), b,
 				manifestResult, logger)
 			manifest := b.Interpolate(manifestResult.manifest,
-				manifestResult.boshVariables, e.credhubStub())
+				manifestResult.boshVariables, e.credhubVars(), e.credhubStub())
 
 			createResultIfMissingForManifest(e.result(), manifest, logger)
 			result, err := ioutil.ReadFile(e.result())
