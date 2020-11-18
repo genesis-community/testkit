@@ -1,0 +1,8 @@
+# test secrets credhub vars stub
+---
+instance_groups:
+- name: jumpbox
+  jobs:
+  - name: jumpbox
+    properties:
+      secret_var: ((top_secret_var))

@@ -11,6 +11,7 @@ type Environment struct {
 	Name           string
 	CloudConfig    string
 	RuntimeConfig  string
+	CredhubVars    string
 	Exodus         string
 	CPI            string
 	Ops            []string
@@ -42,6 +43,10 @@ func (e Environment) exodusStub() string {
 
 func (e Environment) vaultCache() string {
 	return e.filePathForDir("vault", e.Name)
+}
+
+func (e Environment) credhubVars() string {
+	return e.filePathForDir("credhub_variables", e.CredhubVars)
 }
 
 func (e Environment) credhubStub() string {
