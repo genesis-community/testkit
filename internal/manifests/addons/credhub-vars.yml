@@ -6,3 +6,7 @@ instance_groups:
   - name: jumpbox
     properties:
       secret_var: ((top_secret_var))
+
+variables:
+  - name: password
+    type: password
