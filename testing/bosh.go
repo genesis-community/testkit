@@ -47,7 +47,7 @@ func (b *bosh) Interpolate(manifest []byte, boshVars []byte, credhubVars string,
 	return b.bosh(args...).Run(nil)
 }
 
-func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte) []byte {
+func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte, credhubVars string) []byte {
 	b.logger.Println(string(manifest))
 	m := writeTmpFile(manifest)
 	defer os.Remove(m)
@@ -56,7 +56,15 @@ func (b *bosh) GenerateCredhubStub(manifest []byte, boshVars []byte) []byte {
 	cs := writeTmpFile([]byte("{}"))
 	defer os.Remove(cs)
 
-	b.bosh("int", m, "--vars-file", v, "--vars-store", cs, "--var-errs").Run(nil)
+	args := []string{
+		"int", m, "--vars-file", v, "--vars-store", cs, "--var-errs",
+	}
+
+	if _, err := os.Stat(credhubVars); err == nil {
+		args = append(args, "--vars-file", credhubVars)
+	}
+
+	b.bosh(args...).Run(nil)
 
 	creds, err := ioutil.ReadFile(cs)
 	Expect(err).ToNot(HaveOccurred())
