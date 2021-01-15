@@ -1,0 +1,6 @@
+# Optional
+secret/exodus/base/bosh:
+  ca_cert: "mycert"
+  credhub_ca_cert: "credhubcacert"
+  url: "https://mybosh.com"
+  vault_base: /secret/base/bosh

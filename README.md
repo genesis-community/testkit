@@ -23,3 +23,23 @@ If you have made a change and want to update the result files run:
 rm internal/spec/results/*.yml
 ginkgo internal/spec
 ```
+
+## Example
+
+For a Quick setup, copy `example/spec` directory to your genesis project.
+
+go in to your `spec` directory. and install testkit via go
+`go get -u github.com/genesis-community/testkit`
+
+the following directories in `spec` are:
+
+required:
+- cloud_configs
+- deployments
+
+optional:
+- credhub_variables
+- exodus
+- runtime_configs
+
+configure `spec/spec_test.go` for each deployment.
