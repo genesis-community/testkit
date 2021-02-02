@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
@@ -65,10 +64,8 @@ func newGenesis(environment Environment, workDir string, logger *log.Logger) *ge
 
 func (g *genesis) init() {
 	g.logger.Println(fmt.Sprintf("initializing genesis workdir: %s", g.workDir))
-	err := g.git("config", "--global", "user.name", "Ci Runner").Run()
-	Expect(err).ToNot(HaveOccurred())
-	err = g.git("config", "--global", "user.email", "ci@starkandwayne.com").Run()
-	Expect(err).ToNot(HaveOccurred())
+	g.git("config", "--global", "user.name", "Ci Runner").Run(nil)
+	g.git("config", "--global", "user.email", "ci@starkandwayne.com").Run(nil)
 
 	currentVault := GetCurrentVaultTarget(g.workDir)
 	g.genesis("init",
@@ -277,12 +274,11 @@ func (g *genesis) exodusBase() string {
 	return fmt.Sprintf("secret/exodus/%s", g.environment.Name)
 }
 
-func (g *genesis) git(arg ...string) *exec.Cmd {
-	cmd := exec.Command("git", arg...)
-	cmd.Stdout = g.logger.Writer()
-	cmd.Stderr = g.logger.Writer()
-	cmd.Env = append(os.Environ(), fmt.Sprintf("HOME=%s", g.workDir))
-	return cmd
+func (g *genesis) git(arg ...string) *Cmd {
+	return NewCmd("git", arg, []string{
+		fmt.Sprintf("XDG_CONFIG_HOME=%s/.config", g.workDir),		
+		fmt.Sprintf("HOME=%s", g.workDir),
+	}, g.logger)
 }
 
 func (g *genesis) configsArgs() []string {
