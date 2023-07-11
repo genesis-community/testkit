@@ -60,7 +60,7 @@ func (v *vault) Start() {
 		s.Stderr = ioutil.Discard
 		s.Run()
 		return s.ProcessState.ExitCode()
-	}, "5s", "500ms").Should(Equal(0))
+	}, "20s", "500ms").Should(Equal(0))
 
 }
 
